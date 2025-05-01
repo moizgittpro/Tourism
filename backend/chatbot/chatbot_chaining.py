@@ -267,6 +267,23 @@ state = {
 system_message = []
 
 
+""" VALIDATING USER_INPUTS """
+""" IDEA: VALIDATE USER INPUTS USING LLM  """
+
+## ASSUMING VALDATE GETS a non Formatted Prompt in this TEMPLATE:
+## "" {user_input}  ""
+def validate(prompt,user_input):
+    formatted_prompt = prompt.format(user_input = user_input)
+
+    response = model.invoke(formatted_prompt)
+
+    if "valid" in response.lower() or "yes" in response.lower():
+        return True, "Input is valid."
+    else:
+        return False, "That doesn't seem like a valid input. Please try again."
+
+
+
 def get_destination(user_input):
     """ Gets the Destination From the User """
     system_message.append(destination_system_message)
@@ -277,43 +294,64 @@ def get_destination(user_input):
         ]
     )
 
-    return destination_template.format(user_input = user_input)
+    validate_prompt = "Is {user_input} a valid destination"
+    is_valid,message =  validate(validate_prompt,user_input)  
+    if is_valid:
+        return {"status" : "success", "message":message}
+    else:
+        return {"status" : "failure", "message":message,"template" : destination_template.format(user_input = user_input)}
     
 def get_origin(user_input):
     """ Gets the Start Location from the User """
     system_message.append(origin_system_message)
-    destination_template = ChatPromptTemplate.from_messages(
+    origin_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
             ("human","Given the User Input: {user_input}, Confirm the Start Location and ask for the days of travel")
         ]
     )
-    return destination_template.format(user_input = user_input)
+    validate_prompt = "Is {user_input} a valid origin place"
+    is_valid,message =  validate(validate_prompt,user_input)  
+    if is_valid:
+        return {"status" : "success", "message":message}
+    else:
+        return {"status" : "failure", "message":message,"template" : origin_template.format(user_input = user_input)}
+
 
 def get_days_of_travel(user_input):
     """ Takes in Responce of Initial_prompt_template Contemplates the Days of Travel """
     system_message.append(days_system_message)
-    days_of_travel = ChatPromptTemplate.from_messages(
+    days_of_travel_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
             ("human","Given the User Input: {user_input}, Confirm the Days of Travel and ask for the Mood of Travel")
         ]
     )
 
-    return days_of_travel.format(user_input = user_input)
+    validate_prompt = "Is {user_input} valid days"
+    is_valid,message =  validate(validate_prompt,user_input)  
+    if is_valid:
+        return {"status" : "success", "message":message}
+    else:
+        return {"status" : "failure", "message":message,"template" : days_of_travel_template.format(user_input = user_input)}
 
 
 def get_mood(user_input):
     """  Takes in Responce of Days_of_travel and Contemplates the Mood of Travel """
     system_message.append(mood_system_message)
-    cons_prompt_template = ChatPromptTemplate.from_messages(
+    mood_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
             ("human","Given the User Input: {user_input}, Confirm the Mood of Travel and ask for the Route Preference")
         ]
     )
 
-    return cons_prompt_template.format(user_input = user_input)
+    validate_prompt = "Is {user_input} a valid mood"
+    is_valid,message =  validate(validate_prompt,user_input)  
+    if is_valid:
+        return {"status" : "success", "message":message}
+    else:
+        return {"status" : "failure", "message":message,"template" : mood_template.format(user_input = user_input)}
 
 def get_route(user_input):
     """ Takes in Responce of Mood and Contemplates the Route of Travel """
@@ -325,19 +363,30 @@ def get_route(user_input):
         ]
     )
 
-    return route_template.format(user_input = user_input)
+    validate_prompt = "Is {user_input} a valid route"
+    is_valid,message =  validate(validate_prompt,user_input)  
+    if is_valid:
+        return {"status" : "success", "message":message}
+    else:
+        return {"status" : "failure", "message":message,"template" : route_template.format(user_input = user_input)}
 
-def get_summary(user_input):
-    """ Takes in all the User Inputs and Summarizes them into a single structured format """
-    system_message.append(summary_system_message)
-    summary_template = ChatPromptTemplate.from_messages(
-        [
-            ("system",system_message),
-            ("human","Given the User Input: {user_input}, Summarize the User Inputs into a structured format")
-        ]
-    )
+# def get_summary(user_input):
+#     """ Takes in all the User Inputs and Summarizes them into a single structured format """
+#     system_message.append(summary_system_message)
+#     summary_template = ChatPromptTemplate.from_messages(
+#         [
+#             ("system",system_message),
+#             ("human","Given the User Input: {user_input}, Summarize the User Inputs into a structured format")
+#         ]
+#     )
 
-    return summary_template.format(user_input = user_input)
+#     # validate_prompt = "Is {user_input} a valid "
+#     # is_valid,message =  validate(validate_prompt,user_input)  
+#     # if is_valid:
+#     #     return {"status" : "success", "message":message}
+#     # else:
+#     #     return {"status" : "failure", "message":message,"template" : summary_template.format(user_input = user_input)}
+
 
 
 """ 
@@ -360,6 +409,20 @@ async def chat(request : Request):
     user_input = data.get("user_input") ## LOGIC IN REACT
 
     step = user_state["current_step"]
+
+    if step == "destination":
+        status,message,template = get_destination(user_input)
+        if status == "success":
+            user_state["current_step"] = "origin"
+            state["destination"] = user_input
     
+
+    # if step == "origin":
+    #     status,message,template = get_origin(user_input):
+
+        
+        
+        
+
 
 
