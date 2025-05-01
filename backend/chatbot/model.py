@@ -1,7 +1,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 import os 
-# git
+
 load_dotenv()
 gemini_api_key = os.getenv("gemini_api_key")
 
