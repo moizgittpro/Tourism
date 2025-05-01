@@ -28,15 +28,12 @@ load_dotenv()
 
 from chatbot.chatbot_chaining import *
 
-# response = get_destination("lahore")
+response = get_destination("lahore")
 
-# template = response["template"]
-# status = response["status"]
-# message = response["message"]
+template = response["template"]
+status = response["status"]
+message = response["message"]
+print(template)
 
+# response = validate("Is {user_input} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY","lahore")
 # print(response)
-# print(message)
-# print(status)
-
-response = validate("Is {user_input} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY","lahore")
-print(response)

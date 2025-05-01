@@ -23,9 +23,10 @@
 from fastapi import FastAPI,Request
 from fastapi.responses import JSONResponse
 from langchain.prompts import ChatPromptTemplate
-from langchain.chains import LLMChain
-from chatbot.model import model
-from chatbot.system_message import (
+# from langchain.chains import LLMChain
+# from langchain.chains import SimpleSequentialChain
+from model import model
+from system_message import (
     destination_system_message,
     origin_system_message,
     days_system_message,
@@ -37,15 +38,25 @@ from chatbot.system_message import (
 
 
 ## END GOAL: Fill in state variables with user inputs
+# states = {
+#     "destination" : None,
+#     "origin" : None,
+#     "days" : None,
+#     "mood" : None,
+#     "route" : None,
+#     "summary" : None
+
+# }
+
 states = {
-    "destination" : None,
-    "origin" : None,
-    "days" : None,
-    "mood" : None,
-    "route" : None,
-    "summary" : None
+    "destination" : "lahore",
+    "origin" : "quetta",
+    "days" : "3",
+    "mood" : "Historical",
+    "route" : "Car"
 
 }
+
 
 system_message = []
 
@@ -55,56 +66,67 @@ system_message = []
 
 ## ASSUMING VALDATE GETS a non Formatted Prompt in this TEMPLATE:
 ## "" {user_input}  ""
-def validate(prompt,user_input):
-    formatted_prompt = prompt.format(user_input = user_input)
-
-    response = model.invoke(formatted_prompt)
-
-    if response.content in ("TRUE","FALSE","true","false"):
-        return True, "Input is valid."
-    else:
+def validate(prompt, user_input):
+    """
+    Validates user input against a prompt template.
+    Extracts the parameter name from the prompt and formats it with the user input.
+    """
+    try:
+        # Extract parameter name from the prompt string
+        # Example: "Is {destination} a valid destination" -> "destination"
+        param_name = prompt.split("{")[1].split("}")[0]
+        
+        # Format the prompt with the extracted parameter
+        formatted_prompt = prompt.format(**{param_name: user_input})
+        
+        response = model.invoke(formatted_prompt)
+        
+        if response.content.upper() in ("TRUE", "FALSE"):
+            return True, "Input is valid."
         return False, "That doesn't seem like a valid input. Please try again."
+    except Exception as e:
+        return False, f"Validation error: {str(e)}"
 
 
 
-def get_destination(user_input):
+def get_destination(destination):
     """ Gets the Destination From the User """
     system_message.append(destination_system_message)
     destination_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {user_input}, Confirm the Destination and ask for the starting location")
+            ("human","Given the User Input: {destination}, Confirm the Destination and ask for the starting location")
         ]
     )
 
-    validate_prompt = "Is {user_input} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
-    is_valid,message =  validate(validate_prompt,user_input)  
+    validate_prompt = "Is {destination} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
+    is_valid,message =  validate(validate_prompt,destination)  
     if is_valid:
-        return {"status" : "success", "message":message,"template" : destination_template.format(user_input = user_input)}
+        return {"status" : "success", "message":message,"template" : destination_template.format(destination=destination)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
 
 # response = validate("Is {user_input} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY","lahore")
 # print(response)
 
-def get_origin(user_input):
+def get_origin(origin):
     """ Gets the Start Location from the User """
     system_message.append(origin_system_message)
     origin_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {user_input}, Confirm the Start Location and ask for the days of travel")
+            ("human","Given the User Input: {origin}, Confirm the Start Location and ask for the days of travel")
         ]
     )
-    validate_prompt = "Is {user_input} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,user_input)  
+    validate_prompt = "Is {origin} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
+    is_valid,message =  validate(validate_prompt,origin)  
     if is_valid:
-         return {"status" : "success", "message":message,"template" : origin_template.format(user_input = user_input)}
+         return {"status" : "success", "message":message,"template" : origin_template.format(origin = origin)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
 
 
-def get_days_of_travel(user_input):
+def get_days_of_travel(days_of_travel):
     """ Takes in Responce of Initial_prompt_template Contemplates the Days of Travel """
     system_message.append(days_system_message)
     days_of_travel_template = ChatPromptTemplate.from_messages(
@@ -114,47 +136,47 @@ def get_days_of_travel(user_input):
         ]
     )
 
-    validate_prompt = "Is {user_input} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,user_input)  
+    validate_prompt = "Is {days_of_travel} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
+    is_valid,message =  validate(validate_prompt,days_of_travel)  
     if is_valid:
-        return {"status" : "success", "message":message,"template" : days_of_travel_template.format(user_input = user_input)}
+        return {"status" : "success", "message":message,"template" : days_of_travel_template.format(days_of_travel= days_of_travel)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
 
 
 
-def get_mood(user_input):
+def get_mood(mood):
     """  Takes in Responce of Days_of_travel and Contemplates the Mood of Travel """
     system_message.append(mood_system_message)
     mood_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {user_input}, Confirm the Mood of Travel and ask for the Route Preference")
+            ("human","Given the User Input: {mood}, Confirm the Mood of Travel and ask for the Route Preference")
         ]
     )
 
-    validate_prompt = "Is {user_input} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,user_input)  
+    validate_prompt = "Is {mood} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
+    is_valid,message =  validate(validate_prompt,mood)  
     if is_valid:
-        return {"status" : "success", "message":message,"template" : mood_template.format(user_input = user_input)}
+        return {"status" : "success", "message":message,"template" : mood_template.format(mood=mood)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
 
 
-def get_route(user_input):
+def get_route(route):
     """ Takes in Responce of Mood and Contemplates the Route of Travel """
     system_message.append(route_system_message)
     route_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {user_input}, Confirm the Route Preference")
+            ("human","Given the User Input: {route}, Confirm the Route Preference")
         ]
     )
 
-    validate_prompt = "Is {user_input} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
-    is_valid,message =  validate(validate_prompt,user_input)  
+    validate_prompt = "Is {route} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
+    is_valid,message =  validate(validate_prompt,route)  
     if is_valid:
-        return {"status" : "success", "message":message,"template" : route_template.format(user_input = user_input)}
+        return {"status" : "success", "message":message,"template" : route_template.format(route=route)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
 
@@ -190,23 +212,71 @@ def get_route(user_input):
 """
 
 
-def generate_summary(prompts):
+def generate_summary():
     """ 
-        IT GETS ALL THE INPUTS FROM THE STATES 
-        CHAINS THEM ALL TOGETHER AND GENERATES A SUMMARY
+    IT GETS ALL THE INPUTS FROM THE STATES 
+    CHAINS THEM ALL TOGETHER AND GENERATES A SUMMARY
     """
     for key,value in states.items():
         if value is None:
-            return {"status" : "failure","message":f"{key} is None","returnType": False}
+            return {"status": "failure", "message": f"{key} is None", "returnType": None}
         
-    dest_template = get_destination(states["destinaton"])
-    origin_template = get_origin(states["origin"])
-    days_template = get_destination(states["days"])
-    mood_template = get_origin(states["mood"])
-    route_template = get_destination(states["route"])
+    # Get the responses from each function
+    dest_response = get_destination(states["destination"])
+    origin_response = get_origin(states["origin"])
+    days_response = get_days_of_travel(states["days"])
+    mood_response = get_mood(states["mood"])
+    route_response = get_route(states["route"])
+
+    # Create a final template for summarizing all inputs
+    summary_template = ChatPromptTemplate.from_messages([
+        ("system", "You are a helpful travel assistant. Summarize the following travel details."),
+        ("human", """
+        Destination: {destination}
+        Origin: {origin}
+        Days of Travel: {days}
+        Mood: {mood}
+        Route: {route}
+        
+        Please provide a comprehensive summary of this travel plan.
+        """)
+    ])
+
+    # Format the template with all the state values
+    formatted_summary = summary_template.format_messages(
+        destination=states["destination"],
+        origin=states["origin"],
+        days=states["days"],
+        mood=states["mood"],
+        route=states["route"]
+    )
+
+    # Create the chain
+    chain = summary_template | model
+
+    if chain:
+        return {"status": "success", "message": "Chain created successfully", "returnType": chain}
+    
+    return {"status": "failure", "message": "Failed to create chain", "returnType": None}
+
+# Use the chain
+response = generate_summary()
+if response["status"] == "success":
+    chain = response["returnType"]
+    result = chain.invoke({
+        "destination": states["destination"],
+        "origin": states["origin"],
+        "days": states["days"],
+        "mood": states["mood"],
+        "route": states["route"]
+    })
+    print(result)
+
+response = generate_summary()
+overall_chain = response["returnType"]
+print(overall_chain.run())
 
 
-    # TODO: CREATE SIMPLE CHAIN AND 
 
 
 """
