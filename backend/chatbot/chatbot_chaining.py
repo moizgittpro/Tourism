@@ -175,7 +175,7 @@ def get_route(route):
     route_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {route}, Confirm the Route Preference")
+            ("human", "Given the User Input: {route}, Confirm the Route Preference and let the user know that all information has been collected")
         ]
     )
 
@@ -248,7 +248,7 @@ def generate_summary():
         - Mood/Theme: {mood}
         - Preferred Route: {route}
 
-        Please provide a vivid and informative travel summary including recommendations, tone suited to the mood, and travel tips if appropriate.
+        Please provide a vivid and informative travel summary including recommendations, tone suited to the mood, and travel tips if appropriate. For Each Day
         """)
     ])
 
@@ -270,7 +270,7 @@ def generate_summary():
 
 
 
-## THIS WORKS 
+# # THIS WORKS 
 # response = generate_summary()
 # if response["status"] == "success":
 #     print(response["returnType"])
@@ -333,7 +333,7 @@ async def chat(request : Request):
             template = response["template"]
             return_json = model.invoke(template).content
         else:
-            return_json = f"Error: {response['message']} Please provide a valid destination."
+            return_json = f"Error: {response['message']} Please provide a valid origin."
     
     elif step == "days":
         response = get_days_of_travel(user_input)
@@ -343,7 +343,7 @@ async def chat(request : Request):
             template = response["template"]
             return_json = model.invoke(template).content
         else:
-            return_json = f"Error: {response['message']} Please provide a valid destination."
+            return_json = f"Error: {response['message']} Please provide a valid day."
     
     elif step == "mood":
         response = get_mood(user_input)
@@ -353,7 +353,7 @@ async def chat(request : Request):
             template = response["template"]
             return_json = model.invoke(template).content
         else:
-            return_json = f"Error: {response['message']} Please provide a valid destination."
+            return_json = f"Error: {response['message']} Please provide a valid mood."
 
     elif step == "route":
         response = get_route(user_input)
@@ -363,15 +363,15 @@ async def chat(request : Request):
             template = response["template"]
             return_json = model.invoke(template).content
         else:
-            return_json = f"Error: {response['message']} Please provide a valid destination."
+            return_json = f"Error: {response['message']} Please provide a valid route."
 
     elif step == "summary":
         # Generate final summary
         summary_response = generate_summary(states)
         if summary_response["status"] == "success":
-            return_json = summary_response["content"]
+            return_json = summary_response["returnType"]
         else:
-            return_json = f"Error: {response['message']} Please provide a valid destination."
+            return_json = f"Error: {response['message']} Please provide a valid summary."
 
     return JSONResponse(content={"message": return_json, "step": user_state["current_step"]})
 
