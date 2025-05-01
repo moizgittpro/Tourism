@@ -1,311 +1,360 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
+import { MapPin, Calendar, Compass, Truck, RefreshCw, Send, ArrowRight, Loader, ClipboardList } from 'lucide-react';
 import './journey_curator.css';
 
-function Chat() {
-  const [messages, setMessages] = useState([
-    { type: 'bot', content: 'Hello! I can help you plan your trip. Please tell me your destination.', step: 'destination' }
-  ]);
-  const [input, setInput] = useState('');
+const Chat = () => {
   const [currentStep, setCurrentStep] = useState('destination');
-  const [isTyping, setIsTyping] = useState(false);
-  const [tripData, setTripData] = useState({
-    destination: null,
-    origin: null,
-    days: null,
-    mood: null,
-    route: null
-  });
+  const [userInput, setUserInput] = useState('');
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: 'Hello! I can help you plan your trip. Please tell me your destination.' }
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [summaryData, setSummaryData] = useState(null);
+  const [summary, setSummary] = useState('');
   const [progress, setProgress] = useState(0);
-
+  const [theme, setTheme] = useState('aurora');
+  const [allInputs, setAllInputs] = useState({});
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
 
-  // This would normally be a real API call
-  const mockAPICall = (userInput) => {
-    setIsTyping(true);
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        let nextStep = currentStep;
-        let response = '';
-        
-        if (currentStep === 'destination') {
-          setTripData(prev => ({ ...prev, destination: userInput }));
-          response = `Great! ${userInput} is a wonderful destination. Now, where will you be starting your journey from?`;
-          nextStep = 'origin';
-        } else if (currentStep === 'origin') {
-          setTripData(prev => ({ ...prev, origin: userInput }));
-          response = `Starting from ${userInput}. How many days do you plan to travel?`;
-          nextStep = 'days';
-        } else if (currentStep === 'days') {
-          setTripData(prev => ({ ...prev, days: userInput }));
-          response = `${userInput} days is perfect for this trip. What mood or theme are you looking for? (e.g., Adventure, Relaxation, Historical, Cultural)`;
-          nextStep = 'mood';
-        } else if (currentStep === 'mood') {
-          setTripData(prev => ({ ...prev, mood: userInput }));
-          response = `A ${userInput} journey sounds wonderful! What's your preferred mode of transportation? (e.g., Car, Train, Plane, Bus)`;
-          nextStep = 'route';
-        } else if (currentStep === 'route') {
-          setTripData(prev => ({ ...prev, route: userInput }));
-          response = `Perfect! You've provided all the information I need. Let me prepare a summary of your trip plan.`;
-          nextStep = 'summary';
-          
-          // Generate mock summary data
-          const mockSummaryData = generateMockSummary({
-            destination: tripData.destination,
-            origin: tripData.origin,
-            days: tripData.days,
-            mood: tripData.mood,
-            route: userInput
-          });
-          
-          setSummaryData(mockSummaryData);
-        }
-        
-        resolve({ message: response, step: nextStep });
-        setIsTyping(false);
-      }, 1500);
-    });
-  };
-
-  const generateMockSummary = (data) => {
-    const daysCount = parseInt(data.days);
-    const dayPlans = [];
-    
-    for (let i = 1; i <= daysCount; i++) {
-      dayPlans.push({
-        day: i,
-        title: `Day ${i}: ${i === 1 ? 'Arrival & Exploration' : i === daysCount ? 'Final Adventures' : `${data.mood} Adventures`}`,
-        description: `Start your day with breakfast at a local café. ${
-          i === 1 
-            ? `Arrive in ${data.destination} and check into your accommodation.` 
-            : `Continue exploring ${data.destination} with a focus on ${data.mood.toLowerCase()} attractions.`
-        } Visit key landmarks and enjoy local cuisine for lunch. ${
-          data.mood === 'Historical' 
-            ? 'Tour historical monuments and museums.' 
-            : data.mood === 'Adventure' 
-              ? 'Experience thrilling outdoor activities.' 
-              : 'Immerse yourself in the local culture.'
-        } End the day with dinner at a renowned restaurant.`,
-        highlights: [
-          `Morning: ${i === 1 ? 'Arrival & Check-in' : 'Local Exploration'}`,
-          `Afternoon: ${data.mood} Activities`,
-          `Evening: Cultural Experience`,
-        ],
-        image: `/api/placeholder/400/200`
-      });
-    }
-    
-    return {
-      title: `Your ${data.mood} Trip: ${data.origin} to ${data.destination}`,
-      overview: `A ${daysCount}-day ${data.mood.toLowerCase()} journey from ${data.origin} to ${data.destination} by ${data.route.toLowerCase()}.`,
-      days: dayPlans,
-      tips: [
-        "Pack appropriate clothes for the weather",
-        `Bring comfortable shoes for ${data.mood.toLowerCase()} activities`,
-        `Learn a few phrases in the local language`,
-        `Exchange some currency before arrival`
-      ]
-    };
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || isTyping) return;
-    
-    // Add user message
-    setMessages(prev => [...prev, { type: 'user', content: input }]);
-    const userInput = input;
-    setInput('');
-    
-    try {
-      // Mock API call
-      const response = await mockAPICall(userInput);
-      
-      // Add bot response
-      setMessages(prev => [...prev, { type: 'bot', content: response.message, step: response.step }]);
-      setCurrentStep(response.step);
-      
-      // Update progress
-      updateProgress(response.step);
-      
-      // Show summary if we're at that step
-      if (response.step === 'summary') {
-        setTimeout(() => {
-          setShowSummary(true);
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => [
-        ...prev, 
-        { type: 'bot', content: 'Sorry, there was an error processing your request. Please try again.' }
-      ]);
+  // Define steps and their configurations
+  const steps = {
+    destination: {
+      icon: <MapPin />,
+      title: 'Destination',
+      placeholder: 'Where are you going?',
+      emoji: '🏝️'
+    },
+    origin: {
+      icon: <MapPin />,
+      title: 'Origin',
+      placeholder: 'Where are you starting from?',
+      emoji: '🏠'
+    },
+    days: {
+      icon: <Calendar />,
+      title: 'Duration',
+      placeholder: 'How many days?',
+      emoji: '📅'
+    },
+    mood: {
+      icon: <Compass />,
+      title: 'Travel Mood',
+      placeholder: 'Adventure, Relaxation, Historical...',
+      emoji: '🌈'
+    },
+    route: {
+      icon: <Truck />,
+      title: 'Transportation',
+      placeholder: 'Car, Train, Plane...',
+      emoji: '🚗'
+    },
+    summary: {
+      icon: <ClipboardList />,
+      title: 'Summary',
+      placeholder: '',
+      emoji: '✨'
     }
   };
 
-  const updateProgress = (step) => {
-    const steps = ['destination', 'origin', 'days', 'mood', 'route', 'summary'];
-    const currentIndex = steps.indexOf(step);
-    const progressPercentage = (currentIndex / (steps.length - 1)) * 100;
-    setProgress(progressPercentage);
+  // Themes configuration
+  const themes = {
+    aurora: 'theme-aurora',
+    sunset: 'theme-sunset',
+    ocean: 'theme-ocean',
+    forest: 'theme-forest'
   };
 
-  const resetConversation = () => {
-    setMessages([
-      { type: 'bot', content: 'Hello! I can help you plan your trip. Please tell me your destination.', step: 'destination' }
-    ]);
-    setCurrentStep('destination');
-    setTripData({
-      destination: null,
-      origin: null,
-      days: null,
-      mood: null,
-      route: null
-    });
-    setShowSummary(false);
-    setSummaryData(null);
-    setProgress(0);
-  };
+  // Calculate progress based on current step
+  useEffect(() => {
+    const stepIndex = Object.keys(steps).indexOf(currentStep);
+    const totalSteps = Object.keys(steps).length - 1;
+    const newProgress = (stepIndex / totalSteps) * 100;
+    setProgress(newProgress);
+    
+    if (currentStep === 'summary') {
+      setShowSummary(true);
+    }
+  }, [currentStep, steps]);
 
+  // Scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+  };
 
-  return (
-    <div className="app-container">
-      <header className="app-header">
-        <div className="logo-container">
-          <span className="logo-icon">✈️</span>
-          <h1>TripPlanner AI</h1>
-        </div>
-        <div className="progress-container">
-          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
-        </div>
-        <div className="step-indicators">
-          <div className={`step ${currentStep === 'destination' || progress >= 20 ? 'active' : ''}`}>Destination</div>
-          <div className={`step ${currentStep === 'origin' || progress >= 40 ? 'active' : ''}`}>Origin</div>
-          <div className={`step ${currentStep === 'days' || progress >= 60 ? 'active' : ''}`}>Days</div>
-          <div className={`step ${currentStep === 'mood' || progress >= 80 ? 'active' : ''}`}>Mood</div>
-          <div className={`step ${currentStep === 'route' || progress >= 100 ? 'active' : ''}`}>Route</div>
-        </div>
-      </header>
+  const handleSendMessage = async () => {
+    if (!userInput.trim() || isLoading) return;
+    
+    setMessages(prev => [...prev, { role: 'user', content: userInput }]);
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: userInput }),
+      });
+      
+      const data = await response.json();
+      
+      // Store input for the current step
+      setAllInputs(prev => ({
+        ...prev,
+        [currentStep]: userInput
+      }));
 
-      <main className="content-area">
-        {!showSummary ? (
-          <div className="chat-container">
-            <div className="messages-container">
-              {messages.map((message, index) => (
-                <div 
-                  key={index} 
-                  className={`message ${message.type}-message ${message.step === 'summary' ? 'summary-preview' : ''}`}
-                >
-                  <div className="message-avatar">
-                    {message.type === 'bot' ? '🤖' : '👤'}
-                  </div>
-                  <div className="message-content">
-                    {message.content}
-                  </div>
+      // Add assistant response
+      setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
+      setCurrentStep(data.step);
+      
+      // Handle summary step
+      if (data.step === 'summary') {
+        setSummary(data.message);
+        setShowSummary(true);
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, there was an error processing your request.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+      setUserInput('');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+
+  const resetConversation = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:8000/reset', {
+        method: 'POST',
+      });
+      
+      const data = await response.json();
+      
+      setMessages([{ role: 'assistant', content: data.message }]);
+      setCurrentStep('destination');
+      setShowSummary(false);
+      setSummary('');
+      setProgress(0);
+      setAllInputs({});
+      
+    } catch (error) {
+      console.error('Error resetting:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderSummary = () => {
+    if (!summary) return null;
+
+    const days = summary.split(/Day \d+:/g).filter(Boolean);
+    const hasDays = days.length > 1;
+
+    return (
+      <div className="summary-container">
+        <div className="summary-card">
+          <div className="summary-header">
+            <h2>Your Personalized Travel Plan</h2>
+            <div className="summary-badge">Dream Journey</div>
+          </div>
+          <div className="summary-content">
+            <div className="summary-overview">
+              <h3>Trip Details</h3>
+              <div className="trip-details">
+                <div className="detail-item">
+                  <MapPin size={16} />
+                  <span>From: {allInputs.origin}</span>
                 </div>
-              ))}
-              {isTyping && (
-                <div className="message bot-message typing">
-                  <div className="message-avatar">🤖</div>
-                  <div className="message-content">
-                    <div className="typing-indicator">
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </div>
+                <div className="detail-item">
+                  <MapPin size={16} />
+                  <span>To: {allInputs.destination}</span>
+                </div>
+                <div className="detail-item">
+                  <Calendar size={16} />
+                  <span>Duration: {allInputs.days} days</span>
+                </div>
+                <div className="detail-item">
+                  <Compass size={16} />
+                  <span>Style: {allInputs.mood}</span>
+                </div>
+                <div className="detail-item">
+                  <Truck size={16} />
+                  <span>Transport: {allInputs.route}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="daily-summaries">
+              {hasDays ? (
+                days.map((day, index) => (
+                  <div key={index} className="day-summary">
+                    <h3>Day {index + 1}</h3>
+                    {day.split('\n').map((line, i) => (
+                      line.trim() ? <p key={i}>{line.trim()}</p> : null
+                    ))}
                   </div>
+                ))
+              ) : (
+                <div className="general-summary">
+                  {summary.split('\n').map((line, i) => (
+                    line.trim() ? <p key={i}>{line.trim()}</p> : null
+                  ))}
                 </div>
               )}
-              <div ref={messagesEndRef} />
             </div>
-            
-            <form className="input-container" onSubmit={handleSubmit}>
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={`Enter your ${
-                  currentStep === 'destination' ? 'destination' :
-                  currentStep === 'origin' ? 'starting point' :
-                  currentStep === 'days' ? 'number of days' :
-                  currentStep === 'mood' ? 'preferred mood/theme' :
-                  currentStep === 'route' ? 'transportation method' :
-                  'message'
-                }...`}
-                disabled={isTyping || currentStep === 'summary'}
-              />
-              <button 
-                type="submit" 
-                disabled={!input.trim() || isTyping || currentStep === 'summary'}
-                className={input.trim() && !isTyping && currentStep !== 'summary' ? 'active' : ''}
-              >
-                <span className="send-icon">➤</span>
-              </button>
-            </form>
           </div>
-        ) : (
-          <div className="summary-container">
-            <div className="summary-header">
-              <h2>{summaryData.title}</h2>
-              <p className="overview">{summaryData.overview}</p>
-            </div>
-            
-            <div className="days-container">
-              {summaryData.days.map((day, index) => (
-                <div key={index} className="day-card">
-                  <div className="day-header">
-                    <h3>{day.title}</h3>
-                  </div>
-                  <div className="day-content">
-                    <div className="day-image">
-                      <img src={day.image} alt={`Day ${day.day}`} />
-                    </div>
-                    <p className="day-description">{day.description}</p>
-                    <div className="day-highlights">
-                      {day.highlights.map((highlight, i) => (
-                        <div key={i} className="highlight-item">
-                          <span className="highlight-icon">✓</span>
-                          <span className="highlight-text">{highlight}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="travel-tips">
-              <h3>Travel Tips</h3>
-              <ul>
-                {summaryData.tips.map((tip, index) => (
-                  <li key={index}>{tip}</li>
-                ))}
-              </ul>
-            </div>
-            
-            <button className="new-trip-button" onClick={resetConversation}>
-              Plan Another Trip
+          <div className="summary-footer">
+            <button className="new-plan-btn" onClick={resetConversation}>
+              <RefreshCw size={16} />
+              <span>Create New Plan</span>
             </button>
           </div>
-        )}
-      </main>
-      
-      <footer className="app-footer">
-        <p>© 2025 TripPlanner AI | Your AI Travel Assistant</p>
-      </footer>
+        </div>
+      </div>
+    );
+  };
+// Replace the existing return statement with:
+
+return (
+  <div className={`travel-planner ${themes[theme]}`}>
+    <div className="theme-switcher">
+      <button 
+        className={`theme-btn aurora ${theme === 'aurora' ? 'active' : ''}`} 
+        onClick={() => handleThemeChange('aurora')}
+        title="Aurora Theme"
+      ></button>
+      <button 
+        className={`theme-btn sunset ${theme === 'sunset' ? 'active' : ''}`} 
+        onClick={() => handleThemeChange('sunset')}
+        title="Sunset Theme"
+      ></button>
+      <button 
+        className={`theme-btn ocean ${theme === 'ocean' ? 'active' : ''}`} 
+        onClick={() => handleThemeChange('ocean')}
+        title="Ocean Theme"
+      ></button>
+      <button 
+        className={`theme-btn forest ${theme === 'forest' ? 'active' : ''}`} 
+        onClick={() => handleThemeChange('forest')}
+        title="Forest Theme"
+      ></button>
     </div>
-  );
-}
+
+    <div className="container">
+      <div className="sidebar">
+        <div className="app-title">
+          <h1>Wanderlust</h1>
+          <p>Your personal journey creator</p>
+        </div>
+        
+        <div className="progress-container">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+          </div>
+          <p className="progress-text">{Math.round(progress)}% completed</p>
+        </div>
+        
+        <div className="steps-container">
+          {Object.entries(steps).map(([key, step]) => (
+            <div 
+              key={key} 
+              className={`step-item ${Object.keys(steps).indexOf(key) <= Object.keys(steps).indexOf(currentStep) ? 'active' : ''}`}
+            >
+              <div className="step-icon">{step.icon}</div>
+              <div className="step-info">
+                <div className="step-title">{step.title}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <button className="reset-btn" onClick={resetConversation}>
+          <RefreshCw size={16} />
+          <span>New Journey</span>
+        </button>
+      </div>
+      
+      <div className="main-content">
+        {showSummary ? (
+          renderSummary()
+        ) : (
+          <>
+            <div className="messages-container">
+              <div className="messages">
+                {messages.map((message, index) => (
+                  <div 
+                    key={index} 
+                    className={`message ${message.role}`}
+                  >
+                    {message.role === 'assistant' && (
+                      <div className="assistant-avatar">JC</div>
+                    )}
+                    <div className="message-content">
+                      {message.content}
+                    </div>
+                    {message.role === 'user' && (
+                      <div className="user-avatar">YOU</div>
+                    )}
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="message assistant">
+                    <div className="assistant-avatar">JC</div>
+                    <div className="message-content loading">
+                      <div className="dot-typing"></div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+            
+            <div className="input-container">
+              <div className="current-step-indicator">
+                <div className="step-icon">{steps[currentStep].icon}</div>
+                <span>{steps[currentStep].title}</span>
+              </div>
+              <div className="input-field">
+                <input
+                  type="text"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={steps[currentStep].placeholder}
+                  disabled={isLoading}
+                />
+                <button
+                  className="send-btn"
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !userInput.trim()}
+                >
+                  {isLoading ? <Loader size={18} className="spinner" /> : <Send size={18} />}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+);};
 
 export default Chat;
+  
