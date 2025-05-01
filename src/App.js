@@ -7,6 +7,7 @@ import DetailedDestination from './pages/DetailedDestination';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Tours from './pages/Tours';
+import Chat from './pages/Chat';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/destination/:id" element={<DetailedDestination />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/Chat" element={<Chat />} />
           <Route path="/tours" element={<Tours />} />
         </Routes>
       </div>

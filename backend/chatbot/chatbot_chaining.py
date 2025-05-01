@@ -25,8 +25,8 @@ from fastapi.responses import JSONResponse
 from langchain.prompts import ChatPromptTemplate
 # from langchain.chains import LLMChain
 # from langchain.chains import SimpleSequentialChain
-from model import model
-from system_message import (
+from .model import model
+from .system_message import (
     destination_system_message,
     origin_system_message,
     days_system_message,
@@ -81,9 +81,15 @@ def validate(prompt, user_input):
         
         response = model.invoke(formatted_prompt)
         
-        if response.content.upper() in ("TRUE", "FALSE"):
+        response_content = response.content.upper().strip()
+        if "TRUE" in response_content:
             return True, "Input is valid."
-        return False, "That doesn't seem like a valid input. Please try again."
+        elif "FALSE" in response_content:
+            return False, f"'{user_input}' doesn't seem valid. Please try again."
+        else:
+            # If the model didn't give a clear TRUE/FALSE, assume it's valid but log it
+            print(f"Warning: Unclear validation response: {response_content}")
+            return True, "Input accepted."
     except Exception as e:
         return False, f"Validation error: {str(e)}"
 
@@ -132,7 +138,7 @@ def get_days_of_travel(days_of_travel):
     days_of_travel_template = ChatPromptTemplate.from_messages(
         [
             ("system",system_message),
-            ("human","Given the User Input: {user_input}, Confirm the Days of Travel and ask for the Mood of Travel")
+            ("human","Given the User Input: {days_of_travel}, Confirm the Days of Travel and ask for the Mood of Travel")
         ]
     )
 
@@ -181,6 +187,7 @@ def get_route(route):
         return {"status" : "failure", "message":message,"template" : None}
 
 
+## UPDATED THIS IN NEXT FUNCTION
 # def get_summary(user_input):
 #     """ Takes in all the User Inputs and Summarizes them into a single structured format """
 #     system_message.append(summary_system_message)
@@ -214,67 +221,61 @@ def get_route(route):
 
 def generate_summary():
     """ 
-    IT GETS ALL THE INPUTS FROM THE STATES 
-    CHAINS THEM ALL TOGETHER AND GENERATES A SUMMARY
+    Gathers all user inputs, validates them, chains them, 
+    and generates a comprehensive travel summary.
     """
-    for key,value in states.items():
+    # Step 1: Validate input states
+    for key, value in states.items():
         if value is None:
             return {"status": "failure", "message": f"{key} is None", "returnType": None}
-        
-    # Get the responses from each function
+
+    # Step 2: Collect responses (if needed to enrich inputs — optional)
     dest_response = get_destination(states["destination"])
     origin_response = get_origin(states["origin"])
     days_response = get_days_of_travel(states["days"])
     mood_response = get_mood(states["mood"])
     route_response = get_route(states["route"])
 
-    # Create a final template for summarizing all inputs
+    # Step 3: Prompt Template
     summary_template = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful travel assistant. Summarize the following travel details."),
+        ("system", "You are a helpful travel assistant. Use the provided travel details to craft a rich, engaging summary."),
         ("human", """
-        Destination: {destination}
-        Origin: {origin}
-        Days of Travel: {days}
-        Mood: {mood}
-        Route: {route}
-        
-        Please provide a comprehensive summary of this travel plan.
+        I am planning a trip with the following details:
+
+        - Destination: {destination}
+        - Origin: {origin}
+        - Duration: {days} day(s)
+        - Mood/Theme: {mood}
+        - Preferred Route: {route}
+
+        Please provide a vivid and informative travel summary including recommendations, tone suited to the mood, and travel tips if appropriate.
         """)
     ])
 
-    # Format the template with all the state values
-    formatted_summary = summary_template.format_messages(
-        destination=states["destination"],
-        origin=states["origin"],
-        days=states["days"],
-        mood=states["mood"],
-        route=states["route"]
-    )
+    # Step 4: Construct the chain and invoke it
+    try:
+        chain = summary_template | model
+        result = chain.invoke({
+            "destination": states["destination"],
+            "origin": states["origin"],
+            "days": states["days"],
+            "mood": states["mood"],
+            "route": states["route"]
+        })
+    except Exception as e:
+        return {"status": "failure", "message": f"Error generating summary: {e}", "returnType": None}
 
-    # Create the chain
-    chain = summary_template | model
+    # Step 5: Return final summary
+    return {"status": "success", "message": "Summary generated successfully", "returnType": result.content}
 
-    if chain:
-        return {"status": "success", "message": "Chain created successfully", "returnType": chain}
-    
-    return {"status": "failure", "message": "Failed to create chain", "returnType": None}
 
-# Use the chain
-response = generate_summary()
-if response["status"] == "success":
-    chain = response["returnType"]
-    result = chain.invoke({
-        "destination": states["destination"],
-        "origin": states["origin"],
-        "days": states["days"],
-        "mood": states["mood"],
-        "route": states["route"]
-    })
-    print(result)
 
-response = generate_summary()
-overall_chain = response["returnType"]
-print(overall_chain.run())
+## THIS WORKS 
+# response = generate_summary()
+# if response["status"] == "success":
+#     print(response["returnType"])
+# else:
+#     print("Error:", response["message"])
 
 
 
@@ -285,13 +286,22 @@ print(overall_chain.run())
 
 def extract_input(user_input):
     pass
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 user_state = {
     "current_step" : "destination",
     "inputs" : {}
 }
+
 
 # current_step ={destination,origin,days,mood,route}
 
@@ -305,43 +315,86 @@ async def chat(request : Request):
     step = user_state["current_step"]
 
     if step == "destination":
-        status,message,template = get_destination(user_input)
-        if status == "success":
+        response = get_destination(user_input)
+        if response["status"] == "success":
             user_state["current_step"] = "origin"
             states["destination"] = user_input
-    
+            template = response["template"]
+            return_json = model.invoke(template).content
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
+            
 
-    if step == "origin":
-        status,message,template = get_origin(user_input)
-        if status == "success":
+    elif step == "origin":
+        response = get_origin(user_input)
+        if response["status"] == "success":
             user_state["current_step"] = "days"
             states["origin"] = user_input
+            template = response["template"]
+            return_json = model.invoke(template).content
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
     
-    if step == "days":
-        status,message,template = get_days_of_travel(user_input)
-        if status == "success":
+    elif step == "days":
+        response = get_days_of_travel(user_input)
+        if response["status"] == "success":
             user_state["current_step"] = "mood"
             states["days"] = user_input
+            template = response["template"]
+            return_json = model.invoke(template).content
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
     
-    if step == "mood":
-        status,message,template = get_days_of_travel(user_input)
-        if status == "success":
+    elif step == "mood":
+        response = get_mood(user_input)
+        if response["status"] == "success":
             user_state["current_step"] = "route"
             states["mood"] = user_input
+            template = response["template"]
+            return_json = model.invoke(template).content
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
 
-    if step == "route":
-        status,message,template = get_days_of_travel(user_input)
-        if status == "success":
+    elif step == "route":
+        response = get_route(user_input)
+        if response["status"] == "success":
             user_state["current_step"] = "summary"
             states["route"] = user_input
+            template = response["template"]
+            return_json = model.invoke(template).content
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
 
-    # if step == "summary":
+    elif step == "summary":
+        # Generate final summary
+        summary_response = generate_summary(states)
+        if summary_response["status"] == "success":
+            return_json = summary_response["content"]
+        else:
+            return_json = f"Error: {response['message']} Please provide a valid destination."
+
+    return JSONResponse(content={"message": return_json, "step": user_state["current_step"]})
 
     
     
         
 
-
+@app.post("/reset")
+async def reset_conversation():
+    global user_state, states, system_message
+    
+    user_state = {
+        "current_step": "destination",
+        "inputs": {}
+    }
+    
+    states = {}
+    system_message = []
+    
+    return JSONResponse(content={
+        "message": "Hello! I can help you plan your trip. Please tell me your destination.", 
+        "step": "destination"
+    })
         
         
         

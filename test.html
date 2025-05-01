@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to the Travel Planner</h1>
+    <p>Let's start planning your trip! Please enter your destination.</p>
+
+    <div class="form-container">
+        <!-- Destination Form -->
+        <input type="text" id="user-input" placeholder="Enter your destination" />
+        <button onclick="submitForm()">Submit</button>
+    </div>
+
+    <div id="response">
+        <!-- This will display the response from the server -->
+        <p id="message"></p>
+        <p><strong>Next Step: </strong><span id="step"></span></p>
+    </div>
+
+    <script>
+        let currentStep = 'destination';
+        const stepInstructions = {
+            'destination': 'Please enter your destination',
+            'origin': 'Where will you be starting from?',
+            'days': 'How many days will you travel?',
+            'mood': 'What kind of experience are you looking for? (Adventure/Relaxation/Cultural)',
+            'route': 'How would you like to travel? (Scenic/Express/Adventure)',
+            'summary': 'Here is your travel summary'
+        };
+    
+        async function submitForm() {
+            const userInput = document.getElementById("user-input").value;
+            const responseContainer = document.getElementById("response");
+            const messageElement = document.getElementById("message");
+            const stepElement = document.getElementById("step");
+            const inputElement = document.getElementById("user-input");
+    
+            if (!userInput) {
+                messageElement.innerText = "Please enter a valid input.";
+                return;
+            }
+    
+            try {
+                messageElement.innerText = "Processing...";
+                
+                const response = await fetch("http://localhost:3003/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ user_input: userInput })
+                });
+    
+                const data = await response.json();
+    
+                if (data.error) {
+                    messageElement.innerText = data.message;
+                    return;
+                }
+    
+                messageElement.innerText = data.message;
+                currentStep = data.step;
+                stepElement.innerText = stepInstructions[currentStep];
+    
+                // Clear input for next step
+                inputElement.value = '';
+                inputElement.placeholder = stepInstructions[currentStep];
+    
+            } catch (error) {
+                messageElement.innerText = "Connection error. Please try again.";
+                console.error("Error:", error);
+            }
+        }
+    </script>
+
+</body>
+</html>
