@@ -9,7 +9,11 @@ from pymongo import MongoClient
 """
     INSTRUCTIONS:
             - FOR ONE-TIME RUN ONLY
+            - FETCH RESTAURENTS USING GOOGLE_PLACE_API (in .env)
+            - STORE IN restaurant_data
+            - PUSH restaurant_data to MONGODB
             - DATA STORED IN LOCAL CLIENT
+            
 """
 
 load_dotenv()
