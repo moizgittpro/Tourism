@@ -1,4 +1,3 @@
-
 # """ VALIDATING USER_INPUTS """
 # """ IDEA: VALIDATE USER INPUTS USING LLM  """
 
@@ -12,4 +11,4 @@
 #     if "valid" in response.lower() or "yes" in response.lower():
 #         return True, "Input is valid."
 #     else:
-#         return False, "That doesn't seem like a valid input. Please try again."
+#         return False, "That doesn't seem like a valid input. Please try again.

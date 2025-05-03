@@ -3,7 +3,7 @@ from fast_flights import FlightData, Passengers, Result, get_flights
 
 result: Result = get_flights(
     flight_data=[
-        FlightData(date="2025-05-05", from_airport="ISB", to_airport="KHI")
+        FlightData(date="2025-05-10", from_airport="ISB", to_airport="KHI")
     ],
     trip="one-way",
     seat="economy",
