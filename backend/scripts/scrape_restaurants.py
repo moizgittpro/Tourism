@@ -42,13 +42,24 @@ def search_restaurants_in_city(city_name):
 
             if response.status_code == 200 and 'results' in data:
                 print(f"Restaurants in {city_name}:\n")
+
+                
                 for place in data['results']:
+
+                    photos = place.get('photos', [])
+                    if photos:
+                        photo_reference = photos[0].get('photo_reference')
+                        # photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={API_KEY}"
+                    else:
+                        photo_reference = "No photo available"
+                        
                     restaurant_data = {
                         "city" : city_name,
                         "name": place.get('name', 'N/A'),
                         "address": place.get('formatted_address', 'N/A'),
                         "rating": place.get('rating', 'N/A'),
                         "types": place.get('types', 'N/A'),
+                        "image" : photo_reference
                     }
                     restaurants_data.append(restaurant_data)
 
