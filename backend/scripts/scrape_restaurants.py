@@ -13,6 +13,10 @@ from pymongo import MongoClient
             - STORE IN restaurant_data
             - PUSH restaurant_data to MONGODB
             - DATA STORED IN LOCAL CLIENT
+
+    TODO :
+        - ADD MORE CITIES  ( DONT RE-RUN FOR SAME CITIES )
+    
             
 """
 
