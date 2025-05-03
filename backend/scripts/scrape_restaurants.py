@@ -24,7 +24,7 @@ cities = [
     "Larkana", "Jhelum", "Gujrat", "Kasur", "Okara"
 ]
 
-# Function to search for restaurants in a specific city
+
 def search_restaurants_in_city(city_name):
     url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
     
@@ -68,32 +68,32 @@ def search_restaurants_in_city(city_name):
                 if next_page_token:
                     params['pagetoken'] = next_page_token  
                 else:
-                    break  # No more pages to fetch
+                    break  #no more pages to fetch
 
-                time.sleep(2)  # To avoid rate-limiting
+                time.sleep(2)  # to avoid rate-limiting
 
             else:
                 return {"status": "failure", "restaurants": None}
 
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data for {city_name}: {e}")
-            break  # Stop trying on error
+            break  #stop trying on error
 
     return {"status": "success", "restaurants": restaurants_data}
 
 
-# Function to store restaurant data in MongoDB
+#store in mongodb (also present in store_restartient.py)
 def store_restaurant(restaurants_data):
     for restaurant_data in restaurants_data:
         collection.insert_one(restaurant_data)
         print(f"Stored: {restaurant_data['name']}")
 
-# Main Loop to process each city
+# MAIN PROCESSING
 for city in cities:
     restaurant_data = search_restaurants_in_city(city)
     if restaurant_data['status'] == "success" and restaurant_data['restaurants'] is not None:
         store_restaurant(restaurants_data=restaurant_data['restaurants'])
-        time.sleep(1)  # To avoid hitting API rate limits
+        time.sleep(1)  #to avoid hitting API rate limits
 
-# Close MongoDB connection
+
 client.close()
