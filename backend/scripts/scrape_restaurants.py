@@ -6,6 +6,12 @@ from store_restaurant import store_restaurant
 from pymongo import MongoClient
 
 
+"""
+    INSTRUCTIONS:
+            - FOR ONE-TIME RUN ONLY
+            - DATA STORED IN LOCAL CLIENT
+"""
+
 load_dotenv()
 google_places_api_key = os.getenv("google_places_api_key")
 
