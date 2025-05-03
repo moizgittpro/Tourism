@@ -14,7 +14,7 @@ def search_restaurants_in_city(city_name):
     # Parameters for the API request
     params = {
         'query': f'restaurants in {city_name}',  # Search term, i.e., "restaurants in Islamabad"
-        'key': 'google_places_api_key', 
+        'key': google_places_api_key, 
     }
     
     # Make the request to Google Places API
@@ -39,4 +39,4 @@ def search_restaurants_in_city(city_name):
         print(f"No results found for restaurants in {city_name}, or an error occurred.")
 
 # Example: search for restaurants in Islamabad
-search_restaurants_in_city("Islamabad")
+search_restaurants_in_city("quetta")
