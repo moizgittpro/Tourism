@@ -3,11 +3,16 @@ import time
 from dotenv import load_dotenv
 import os
 from store_restaurant import store_restaurant
+from pymongo import MongoClient
 
 # Load environment variables
 load_dotenv()
 google_places_api_key = os.getenv("google_places_api_key")
 
+# MongoDB connection
+client = MongoClient("mongodb://localhost:27017")
+db = client['tourism']
+collection = db['restaurants']
 
 cities = [
     "Islamabad", "Karachi", "Lahore", "Peshawar", "Quetta", 
@@ -31,41 +36,53 @@ def search_restaurants_in_city(city_name):
     
     restaurants_data = []
     while True:
-        
-        response = requests.get(url, params=params)
-        data = response.json()
+        try:
+            response = requests.get(url, params=params)
+            data = response.json()
 
-        if response.status_code == 200 and 'results' in data:
-            print(f"Restaurants in {city_name}:\n")
-            for place in data['results']:
-                restaurant_data = {
-                    "name": place.get('name', 'N/A'),
-                    "address": place.get('formatted_address', 'N/A'),
-                    "rating": place.get('rating', 'N/A'),
-                    "types": place.get('types', 'N/A'),
-                }
-                restaurants_data.append(restaurant_data)
+            if response.status_code == 200 and 'results' in data:
+                print(f"Restaurants in {city_name}:\n")
+                for place in data['results']:
+                    restaurant_data = {
+                        "city" : city_name,
+                        "name": place.get('name', 'N/A'),
+                        "address": place.get('formatted_address', 'N/A'),
+                        "rating": place.get('rating', 'N/A'),
+                        "types": place.get('types', 'N/A'),
+                    }
+                    restaurants_data.append(restaurant_data)
 
-            next_page_token = data.get('next_page_token', None)
-            if next_page_token:
-                params['pagetoken'] = next_page_token  
+                # Check for the next page of results
+                next_page_token = data.get('next_page_token', None)
+                if next_page_token:
+                    params['pagetoken'] = next_page_token  
+                else:
+                    break  # No more pages to fetch
+
+                time.sleep(2)  # To avoid rate-limiting
+
             else:
-                break  # No more pages to fetch
+                return {"status": "failure", "restaurants": None}
 
-            time.sleep(2)  # To avoid rate-limiting
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data for {city_name}: {e}")
+            break  # Stop trying on error
 
-            
-
-        else:
-            return {"status": "success", "restaurants": None}
-            
-            
-    
     return {"status": "success", "restaurants": restaurants_data}
 
 
+# Function to store restaurant data in MongoDB
+def store_restaurant(restaurants_data):
+    for restaurant_data in restaurants_data:
+        collection.insert_one(restaurant_data)
+        print(f"Stored: {restaurant_data['name']}")
+
+# Main Loop to process each city
 for city in cities:
     restaurant_data = search_restaurants_in_city(city)
-    if restaurant_data['status'] == "success" and restaurant_data['restaurant'] is not None:
+    if restaurant_data['status'] == "success" and restaurant_data['restaurants'] is not None:
         store_restaurant(restaurants_data=restaurant_data['restaurants'])
-        time.sleep(1)  # To avoid hitting API rate limits,
+        time.sleep(1)  # To avoid hitting API rate limits
+
+# Close MongoDB connection
+client.close()
