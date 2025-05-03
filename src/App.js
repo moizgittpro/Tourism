@@ -8,6 +8,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Tours from './pages/Tours';
 import Chat from './pages/Chat';
+import FlightSearchApp from './pages/Flight';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/Chat" element={<Chat />} />
+          <Route path="/Flight" element={<FlightSearchApp />} />
           <Route path="/tours" element={<Tours />} />
         </Routes>
       </div>
