@@ -22,13 +22,15 @@ user_agents = [
 ]
 
 # Read hotel names from JSON file
-with open('page_names.json', 'r') as file:
+with open('backend/scripts/page_names.json', 'r') as file:
     hotel_names = json.load(file)
 
 if not hotel_names:
     raise ValueError("No hotel names found in page_names.json")
 
 hotel_names = hotel_names["pageNames"]
+
+
 for hotel_name in hotel_names:
     print(f"Scraping hotel: {hotel_name}")
 
@@ -145,7 +147,7 @@ for hotel_name in hotel_names:
 
     # === MongoDB Integration ===
     client = MongoClient("mongodb://localhost:27017/")
-    db = client["hotel_db"]
+    db = client["tourism"]
     collection = db["hotels"]
 
     # Create compound index for optimized search
