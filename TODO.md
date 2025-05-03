@@ -12,7 +12,7 @@
 - [ ] Update summary logic to include hostel information for users
 - [ ] Add flight data integration into the summary output
 - [ ] Get Flight's Data API for better Integration
-
+- ALL DONE -- REMAINING  -- HOTEL SCRAPING - SUMMARY UPDATE
 
 ---
 
