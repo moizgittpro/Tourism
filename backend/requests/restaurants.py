@@ -6,32 +6,37 @@ load_dotenv()
 
 google_places_api_key = os.getenv("google_places_api_key")
 
-def search_restaurants_in_islamabad():
+import requests
+
+def search_restaurants_in_city(city_name):
     url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
     
-    # Define parameters for the API request
+    # Parameters for the API request
     params = {
-        'query': 'restaurants in Islamabad',
-        'location': '33.6844,73.0479',  
-        'radius': 5,  # Search within 5km radius
-        'key': 'google_places_api_key' 
+        'query': f'restaurants in {city_name}',  # Search term, i.e., "restaurants in Islamabad"
+        'key': 'google_places_api_key', 
     }
     
-    # Make the request to the Google Places API
+    # Make the request to Google Places API
     response = requests.get(url, params=params)
     
     # Parse the response JSON
     data = response.json()
 
     if response.status_code == 200 and 'results' in data:
-        print("Restaurants in Islamabad:\n")
+        print(f"Restaurants in {city_name}:\n")
         for place in data['results']:
-            print(f"Name: {place['name']}")
-            print(f"Address: {place['formatted_address']}")
-            print(f"Rating: {place.get('rating', 'N/A')}")
+            # Check if the place contains necessary info and display it
+            name = place.get('name', 'N/A')
+            address = place.get('formatted_address', 'N/A')
+            rating = place.get('rating', 'N/A')
+            
+            print(f"Name: {name}")
+            print(f"Address: {address}")
+            print(f"Rating: {rating}")
             print("-" * 30)
     else:
-        print("No results found or an error occurred.")
+        print(f"No results found for restaurants in {city_name}, or an error occurred.")
 
-# Run the function to search restaurants in Islamabad
-search_restaurants_in_islamabad()
+# Example: search for restaurants in Islamabad
+search_restaurants_in_city("Islamabad")
