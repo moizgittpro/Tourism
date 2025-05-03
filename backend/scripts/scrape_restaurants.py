@@ -29,6 +29,7 @@ def search_restaurants_in_city(city_name):
         'key': google_places_api_key, 
     }
     
+    restaurants_data = []
     while True:
         
         response = requests.get(url, params=params)
@@ -37,26 +38,34 @@ def search_restaurants_in_city(city_name):
         if response.status_code == 200 and 'results' in data:
             print(f"Restaurants in {city_name}:\n")
             for place in data['results']:
-                name = place.get('name', 'N/A')
-                address = place.get('formatted_address', 'N/A')
-                rating = place.get('rating', 'N/A')
-                
-                print(f"Name: {name}")
-                print(f"Address: {address}")
-                print(f"Rating: {rating}")
-                print("-" * 30)
+                restaurant_data = {
+                    "name": place.get('name', 'N/A'),
+                    "address": place.get('formatted_address', 'N/A'),
+                    "rating": place.get('rating', 'N/A'),
+                    "types": place.get('types', 'N/A'),
+                }
+                restaurants_data.append(restaurant_data)
 
-            # Check if there's a next page
             next_page_token = data.get('next_page_token', None)
             if next_page_token:
                 params['pagetoken'] = next_page_token  
             else:
                 break  # No more pages to fetch
+
+            time.sleep(2)  # To avoid rate-limiting
+
+            
+
         else:
-            print(f"Error fetching restaurants for {city_name}.")
-            break
+            return {"status": "success", "restaurants": None}
+            
+            
+    
+    return {"status": "success", "restaurants": restaurants_data}
 
 
 for city in cities:
-    search_restaurants_in_city(city)
-    time.sleep(1)  # To avoid hitting API rate limits,
+    restaurant_data = search_restaurants_in_city(city)
+    if restaurant_data['status'] == "success" and restaurant_data['restaurant'] is not None:
+        store_restaurant(restaurants_data=restaurant_data['restaurants'])
+        time.sleep(1)  # To avoid hitting API rate limits,
