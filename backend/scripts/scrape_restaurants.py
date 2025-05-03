@@ -9,7 +9,7 @@ from pymongo import MongoClient
 load_dotenv()
 google_places_api_key = os.getenv("google_places_api_key")
 
-# MongoDB connection
+# mongod (presnet in store_restartuent.py aswell) 
 client = MongoClient("mongodb://localhost:27017")
 db = client['tourism']
 collection = db['restaurants']
