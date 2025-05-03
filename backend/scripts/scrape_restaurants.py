@@ -5,7 +5,7 @@ import os
 from store_restaurant import store_restaurant
 from pymongo import MongoClient
 
-# Load environment variables
+
 load_dotenv()
 google_places_api_key = os.getenv("google_places_api_key")
 
