@@ -18,6 +18,7 @@
     SOLUTION : 
             EXECUTE THE PROMPT IN PARALLEL AND RETURN THE OUTPUT
             AS SOON AS THE INPUT IS COLLECTED
+
 """
 
 from fastapi import FastAPI,Request
@@ -277,6 +278,11 @@ def generate_summary():
 # else:
 #     print("Error:", response["message"])
 
+
+"""
+    TODO:
+        GET INTERMEDIATE LOCATIONS IF BY CAR
+"""
 
 
 
