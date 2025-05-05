@@ -15,7 +15,7 @@ from pymongo import MongoClient
             - DATA STORED IN LOCAL CLIENT
 
     TODO :
-        - ADD MORE CITIES  ( DONT RE-RUN FOR SAME CITIES)
+        - ADD MORE CITIES  ( DONT RE-RUN FOR SAME CITIES )
     
             
 """
