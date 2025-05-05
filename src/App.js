@@ -10,6 +10,7 @@ import Tours from './pages/Tours';
 import Chat from './pages/Chat';
 import FlightSearchApp from './pages/Flight';
 import Restaurant from './pages/Restaurant';
+import NearbySearch from './pages/NearbySearch';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/destination/:id" element={<DetailedDestination />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/NearbySearch" element={<NearbySearch />} />
           <Route path="/Chat" element={<Chat />} />
           <Route path="/Flight" element={<FlightSearchApp />} />
           <Route path="/Restaurant" element={<Restaurant />} />
