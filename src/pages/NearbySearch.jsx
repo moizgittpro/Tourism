@@ -223,7 +223,7 @@ const NearbySearch = () => {
                   <div className="place-image">
                     {place.photo_reference ? (
                       <img 
-                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${place.photo_reference}&key=YOUR_API_KEY`} 
+                        src={`http://localhost:8000/place-photo?photo_reference=${place.photo_reference}`} 
                         alt={place.name}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -322,7 +322,7 @@ const NearbySearch = () => {
             <div className="modal-image">
               {activePlace.photo_reference ? (
                 <img 
-                  src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${activePlace.photo_reference}&key=YOUR_API_KEY`}
+                  src={`http://localhost:8000/place-photo?photo_reference=${activePlace.photo_reference}`}
                   alt={activePlace.name}
                   onError={(e) => {
                     e.target.onerror = null;
