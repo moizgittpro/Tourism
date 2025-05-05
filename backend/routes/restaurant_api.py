@@ -59,17 +59,17 @@ def get_restaurant_by_city(city):
 # print(get_restaurant_by_city("Islamabad"))
 
 
-app = FastAPI()
+# app = FastAPI()
 
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],  
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"], 
+#     allow_credentials=True,
+#     allow_methods=["GET", "POST", "OPTIONS"],  
+#     allow_headers=["*"],
+# )
 
 
 from fastapi.responses import RedirectResponse
