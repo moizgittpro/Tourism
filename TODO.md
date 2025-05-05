@@ -28,6 +28,8 @@
 - []  IMAGE NOT SHOWING IN RESTAURANT #FIXED
 - []  API KEY LEAKING WHEN INSPECT ELEMENT :: USE GOOGLE REDIRECTS :: FIXED
 
+-[] IMAGES NOT SHOWING AND API KEY LEAKING in NearbySEARCH.jsx :: NOT FIXED
+ 
 ---
 
  Focus: Ensure the chatbot summary is informative, structured, and includes all relevant travel data.
