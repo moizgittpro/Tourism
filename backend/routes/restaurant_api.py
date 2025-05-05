@@ -2,7 +2,14 @@ from fastapi import FastAPI,Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+import random
+load_dotenv()
 
+api_key = os.getenv("google_places_api_key")
+if not api_key:
+    print("\nERROR ::: API_KEY NOT LOADED\n")
 
 Client = MongoClient("mongodb://localhost:27017/")
 
@@ -40,15 +47,20 @@ def get_restaurant_by_city(city):
     ## THE _id is in OBJECT NOT JSON FORMAT
     for res in restaurants_cursor:
         res["_id"] = str(res["_id"])
+        # img_reference = res["image"]
+        # google_image_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={img_reference}&key={api_key}"
+        
+        # res["image"] = google_image_url
         restaurants.append(res)
 
     
     return restaurants
 
-# print(get_restaurant_by_city("Islamabad")["image"][0])
-print(get_restaurant_by_city("Islamabad")[0]) ## EXAMPLE OUTPUT::
+# print(get_restaurant_by_city("Islamabad"))
+
 
 app = FastAPI()
+
 
 
 app.add_middleware(
@@ -58,6 +70,42 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],  
     allow_headers=["*"],
 )
+
+
+from fastapi.responses import RedirectResponse
+
+@app.get("/place-photo")
+def place_photo(photo_reference: str):
+    if not photo_reference:
+        return JSONResponse(content={"error": "Missing photo_reference"}, status_code=400)
+
+    image_url = (
+        f"https://maps.googleapis.com/maps/api/place/photo"
+        f"?maxwidth=400&photoreference={photo_reference}&key={api_key}"
+    )
+    return RedirectResponse(url=image_url,status_code=302)
+
+@app.get("/random-photo")
+def random_photo():
+    # Efficient random document selection with image reference
+    pipeline = [
+        {"$match": {"image": {"$exists": True, "$ne": None}}},
+        {"$sample": {"size": 1}}
+    ]
+    result = list(collection.aggregate(pipeline))
+
+    if not result:
+        return JSONResponse(content={"error": "No images available"}, status_code=404)
+
+    random_image_reference = result[0]["image"]
+
+    image_url = (
+        f"https://maps.googleapis.com/maps/api/place/photo"
+        f"?maxwidth=400&photoreference={random_image_reference}&key={api_key}"
+    )
+
+    return RedirectResponse(url=image_url, status_code=302)
+
 
 @app.post("/restaurant")
 async def restaurant(request : Request):
