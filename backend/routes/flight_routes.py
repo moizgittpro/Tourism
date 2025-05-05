@@ -4,26 +4,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 
-app = FastAPI()
+# app = FastAPI()
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],  
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"], 
+#     allow_credentials=True,
+#     allow_methods=["GET", "POST", "OPTIONS"],  
+#     allow_headers=["*"],
+# )
 
-
-@app.options("/flight")
 async def options_flight():
     return JSONResponse(
         status_code=200,
         content={"message": "OK"}
     )
 
-@app.post("/flight")
 async def flight(request: Request):
     data = await request.json()
     response = data.get("user_input")  # list of input format

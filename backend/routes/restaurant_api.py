@@ -74,7 +74,7 @@ app.add_middleware(
 
 from fastapi.responses import RedirectResponse
 
-@app.get("/place-photo")
+
 def place_photo(photo_reference: str):
     if not photo_reference:
         return JSONResponse(content={"error": "Missing photo_reference"}, status_code=400)
@@ -85,7 +85,7 @@ def place_photo(photo_reference: str):
     )
     return RedirectResponse(url=image_url,status_code=302)
 
-@app.get("/random-photo")
+
 def random_photo():
     # Efficient random document selection with image reference
     pipeline = [
@@ -107,7 +107,6 @@ def random_photo():
     return RedirectResponse(url=image_url, status_code=302)
 
 
-@app.post("/restaurant")
 async def restaurant(request : Request):
     data = await request.json()
     response = data["city"]

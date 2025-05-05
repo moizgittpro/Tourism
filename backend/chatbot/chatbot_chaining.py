@@ -292,16 +292,16 @@ def generate_summary():
 
 def extract_input(user_input):
     pass
-from fastapi.middleware.cors import CORSMiddleware
-app = FastAPI()
+# from fastapi.middleware.cors import CORSMiddleware
+# app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # In production, replace with your frontend URL
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 user_state = {
     "current_step" : "destination",
@@ -311,7 +311,7 @@ user_state = {
 
 # current_step ={destination,origin,days,mood,route}
 
-@app.post("/chat")
+# @app.post("/chat")
 async def chat(request : Request):
     data = await request.json()
     user_input = data.get("user_input") ## LOGIC IN REACT
@@ -385,7 +385,7 @@ async def chat(request : Request):
     
         
 
-@app.post("/reset")
+# @app.post("/reset")
 async def reset_conversation():
     global user_state, states, system_message
     
