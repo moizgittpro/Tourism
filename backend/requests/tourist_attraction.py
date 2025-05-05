@@ -31,6 +31,8 @@ def get_tourist_attractions(location):
     -- CALLS THE LOCATION_TO_CORD AND RETURNS TOURIST ATTRACTION 
     """
 
+    
+
     lat,lng = location_to_cordinates(location)
     
     params = {
@@ -45,9 +47,16 @@ def get_tourist_attractions(location):
 
     data = response.json()
 
+    """
+            OUTPUT PARAMS:
+                'business_status', 'geometry', 'icon', 'icon_background_color',
+                'icon_mask_base_uri', 'name', 'opening_hours', 'photos', 'place_id',
+                'plus_code', 'rating', 'reference', 'scope', 'types', 'user_ratings_total',
+                 'vicinity']
+    """
     if response.status_code == 200 and "results" in data:
-        print(data["results"])
+        return data["results"]
 
     
 
-print(get_tourist_attractions("islamabad"))
+
