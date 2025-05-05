@@ -23,6 +23,7 @@ const Navigation = () => {
     { path: '/tours', label: 'Tours' },
     { path: '/about', label: 'About' },
     { path: '/contact', label: 'Contact' },
+    { path: '/nearbysearch', label: 'Search' },
     { path: '/flight', label: 'Flight' },
     { path: '/restaurant', label: 'Restaurant' },
     {path : '/chat',label : 'Chat'}
