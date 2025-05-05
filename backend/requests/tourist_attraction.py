@@ -60,3 +60,34 @@ def get_tourist_attractions(location):
     
 
 
+def get_type(location,type):
+    """
+    -- CALLS THE LOCATION_TO_CORD AND RETURNS TOURIST ATTRACTION 
+    """
+
+    
+
+    lat,lng = location_to_cordinates(location)
+    
+    params = {
+        "location" : f"{lat},{lng}",
+        "radius"   : 5000,
+        "type"     : f"{type}",
+        "key" : google_places_api_key
+
+        }
+    
+    response = requests.get(NEARBY_SEARCH_URL,params=params)
+
+    data = response.json()
+
+   
+    if response.status_code == 200 and "results" in data:
+        return data["results"]
+    
+
+# data = get_type("islamabad","movie_theater")
+
+# for d in data:
+#     print(d.get('name'))
+
