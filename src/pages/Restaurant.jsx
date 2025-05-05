@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import './restaurant.css';
 import { Search, MapPin, Star, Coffee, Utensils } from 'lucide-react';
 
+// WORKS BUT API KEY IS LEAKED .. 
+
+// FIX :: 
+/*
+
+*/
 const Restaurant = () => {
   const [city, setCity] = useState('');
   const [restaurants, setRestaurants] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearched, setIsSearched] = useState(false);
 
-  const API_KEY = process.env.google_places_api_key;
+  //const API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
   const handleCityChange = (e) => {
     setCity(e.target.value);
@@ -95,10 +101,16 @@ const Restaurant = () => {
               <div key={restaurant._id} className="restaurant-card">
                 <div className="card-image">
                   {restaurant.image ? (
-                    <img 
-                      src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.image}&key=${API_KEY}`} 
-                      alt={restaurant.name} 
+                    <>
+                    <img
+                      src={`http://localhost:8000/place-photo?photo_reference=${restaurant.image}`}
+                      alt={restaurant.name}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'http://localhost:8000/random-photo';
+                      }}
                     />
+                  </>
                   ) : (
                     <div className="placeholder-image">
                       <Utensils size={40} />
