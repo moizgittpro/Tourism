@@ -14,6 +14,9 @@
 - [ ] Get Flight's Data API for better Integration
 - ALL DONE -- REMAINING  -- HOTEL SCRAPING - SUMMARY UPDATE
 
+### BUGS
+- []  IMAGE NOT SHOWING IN RESTAURANT
+
 ---
 
  Focus: Ensure the chatbot summary is informative, structured, and includes all relevant travel data.
