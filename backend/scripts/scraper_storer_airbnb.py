@@ -1,6 +1,4 @@
 import pyairbnb
-import json
-import os
 import time
 from pymongo import MongoClient
 
