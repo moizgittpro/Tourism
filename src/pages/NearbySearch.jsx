@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState } from 'react';
-import './nearbysearch.css';
+import styles from './nearbysearch.module.css';
 
 const NearbySearch = () => {
   const [city, setCity] = useState('');
@@ -77,7 +77,7 @@ const NearbySearch = () => {
   };
 
   const getStarRating = (rating) => {
-    if (!rating) return <span className="no-rating">No ratings yet</span>;
+    if (!rating) return <span className={styles.no-rating}>No ratings yet</span>;
     
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -85,44 +85,45 @@ const NearbySearch = () => {
     
     for (let i = 0; i < 5; i++) {
       if (i < fullStars) {
-        stars.push(<span key={i} className="star full">★</span>);
+        stars.push(<span key={i} className={`${styles.star} ${styles.full}`}>★</span>);
       } else if (i === fullStars && hasHalfStar) {
-        stars.push(<span key={i} className="star half">★</span>);
+        stars.push(<span key={i} className={`${styles.star} ${styles.half}`}>★</span>);
       } else {
-        stars.push(<span key={i} className="star empty">☆</span>);
+        stars.push(<span key={i} className={`${styles.star} ${styles.empty}`}>☆</span>);
       }
     }
     
+    
     return (
-      <div className="star-rating">
-        {stars} <span className="rating-number">({rating})</span>
+      <div className={styles.star_rating}>
+        {stars} <span className={styles.rating_number}>({rating})</span>
       </div>
     );
   };
 
   const getPriceLevel = (level) => {
-    if (level === undefined) return <span className="price-not-available">Price not available</span>;
+    if (level === undefined) return <span className={styles.price_not_available}>Price not available</span>;
     
     const symbols = [];
     for (let i = 0; i < 4; i++) {
       if (i < level) {
-        symbols.push(<span key={i} className="price-symbol active">$</span>);
+        symbols.push(<span key={i} className={`${styles.price_symbol} ${styles.active}`}>$</span>);
       } else {
-        symbols.push(<span key={i} className="price-symbol">$</span>);
+        symbols.push(<span key={i} className={styles.price_symbol}>$</span>);
       }
     }
     
-    return <div className="price-level">{symbols}</div>;
+    return <div className={styles.price_level}>{symbols}</div>;
   };
 
   const showPlaceDetails = (place) => {
     setActivePlace(place);
-    document.body.classList.add('modal-open');
+    document.body.classList.add('modal_open');
   };
 
   const closePlaceDetails = () => {
     setActivePlace(null);
-    document.body.classList.remove('modal-open');
+    document.body.classList.remove('modal_open');
   };
 
   // Get the current collection name for display
@@ -137,23 +138,23 @@ const NearbySearch = () => {
   };
 
   return (
-    <div className="wanderlust-app">
-      <div className="parallax-header">
-        <div className="header-content">
-          <h1 className="app-title">Wander<span>Lust</span></h1>
-          <p className="app-tagline">Unveil the extraordinary in every corner of the world</p>
+    <div className={styles.wanderlust_app}>
+      <div className={styles.parallax_header}>
+        <div className={styles.header_content}>
+          <h1 className={styles.app_title}>Wander<span>Lust</span></h1>
+          <p className={styles.app_tagline}>Unveil the extraordinary in every corner of the world</p>
           
-          <div className="search-container">
-            <form onSubmit={handleSubmit} className="search-form">
-              <div className="input-wrapper">
+          <div className={styles.search_container}>
+            <form onSubmit={handleSubmit} className={styles.search_form}>
+              <div className={styles.input_wrapper}>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="Where to next? Enter a city..."
-                  className="city-input"
+                  className={styles.city_input}
                 />
-                <button type="submit" className="search-button">
+                <button type="submit" className={styles.search_button}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -165,38 +166,38 @@ const NearbySearch = () => {
         </div>
       </div>
 
-      <div className="category-nav-container">
-        <div className="category-scroll">
+      <div className={styles.category_nav_container}>
+        <div className={styles.category_scroll}>
           {collections.map((collection) => (
             <button
               key={collection.id}
-              className={`category-button ${selectedCollection === collection.id ? 'active' : ''}`}
+              className={`${styles['category_button']} ${selectedCollection === collection.id ? styles.active : ''}`}
               onClick={() => {
                 setSelectedCollection(collection.id);
                 if (searchPerformed && city) fetchPlaces();
               }}
             >
-              <span className="category-icon">{collection.icon}</span>
-              <span className="category-name">{collection.name}</span>
+              <span className={styles.category_icon}>{collection.icon}</span>
+              <span className={styles.category_name}>{collection.name}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <main className="main-content">
+      <main className={styles.main_content}>
         {loading && (
-          <div className="loading-container">
-            <div className="loading-animation">
-              <div className="dot dot1"></div>
-              <div className="dot dot2"></div>
-              <div className="dot dot3"></div>
+          <div className={styles.loading_container}>
+            <div className={styles.loading_animation}>
+              <div className={`${styles.dot} ${styles.dot1}`}></div>
+              <div className={`${styles.dot} ${styles.dot2}`}></div>
+              <div className={`${styles.dot} ${styles.dot3}`}></div>
             </div>
             <p>Discovering amazing places...</p>
           </div>
         )}
 
         {error && (
-          <div className="error-message">
+          <div className={styles.error_message}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -207,20 +208,20 @@ const NearbySearch = () => {
         )}
 
         {!loading && places.length > 0 && (
-          <div className="results-section">
-            <div className="results-header">
-              <h2>{getCurrentCollectionIcon()} {getCurrentCollectionName()} in <span className="highlight-city">{city}</span></h2>
-              <p className="results-count">{places.length} places found</p>
+          <div className={styles.results_section}>
+            <div className={styles.results_header}>
+              <h2>{getCurrentCollectionIcon()} {getCurrentCollectionName()} in <span className={styles.highlight_city}>{city}</span></h2>
+              <p className={styles.results_count}>{places.length} places found</p>
             </div>
             
-            <div className="places-grid">
+            <div className={styles.places_grid}>
               {places.map((place) => (
                 <div 
                   key={place.place_id} 
-                  className="place-card"
+                  className={styles.place_card}
                   onClick={() => showPlaceDetails(place)}
                 >
-                  <div className="place-image">
+                  <div className={styles.place_image}>
                     {place.photo_reference ? (
                       <img 
                         src={`http://localhost:8000/place-photo?photo_reference=${place.photo_reference}`} 
@@ -234,24 +235,24 @@ const NearbySearch = () => {
                       <img src="/api/placeholder/400/300" alt="No image available" />
                     )}
                     {place.open_now !== undefined && (
-                      <div className={`status-indicator ${place.open_now ? 'open' : 'closed'}`}>
+                      <div className={`${styles['status_indicator']} ${place.open_now ? styles.open : styles.closed}`}>
                         {place.open_now ? 'Open Now' : 'Closed'}
                       </div>
                     )}
                   </div>
-                  <div className="place-content">
-                    <h3 className="place-name">{place.name}</h3>
-                    <p className="place-address">{place.address}</p>
-                    <div className="place-stats">
-                      <div className="rating-container">
+                  <div className={styles.place_content}>
+                    <h3 className={styles.place_name}>{place.name}</h3>
+                    <p className={styles.place_address}>{place.address}</p>
+                    <div className={styles.place_stats}>
+                      <div className={styles.rating_container}>
                         {getStarRating(place.rating)}
-                        <span className="reviews-count">({place.user_ratings_total || 0})</span>
+                        <span className={styles.reviews_count}>({place.user_ratings_total || 0})</span>
                       </div>
-                      <div className="price-container">
+                      <div className={styles.price_container}>
                         {getPriceLevel(place.price_level)}
                       </div>
                     </div>
-                    <div className="view-details">
+                    <div className={styles.view_details}>
                       <span>View Details</span>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -266,8 +267,8 @@ const NearbySearch = () => {
         )}
 
         {!loading && places.length === 0 && searchPerformed && !error && (
-          <div className="no-results">
-            <div className="no-results-illustration">
+          <div className={styles.no_results}>
+            <div className={styles.no_results_illustration}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -281,8 +282,8 @@ const NearbySearch = () => {
         )}
         
         {!searchPerformed && !loading && (
-          <div className="welcome-section">
-            <div className="welcome-illustration">
+          <div className={styles.welcome_section}>
+            <div className={styles.welcome_illustration}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -291,18 +292,18 @@ const NearbySearch = () => {
             </div>
             <h2>Begin Your Journey</h2>
             <p>Enter a city name and choose a category to discover amazing places around the world</p>
-            <div className="welcome-tips">
-              <div className="tip">
-                <div className="tip-icon">🌎</div>
-                <div className="tip-text">Search any city worldwide</div>
+            <div className={styles.welcome_tips}>
+              <div className={styles.tip}>
+                <div className={styles.tip_icon}>🌎</div>
+                <div className={styles.tip_text}>Search any city worldwide</div>
               </div>
-              <div className="tip">
-                <div className="tip-icon">🔍</div>
-                <div className="tip-text">Explore 8 different categories</div>
+              <div className={styles.tip}>
+                <div className={styles.tip_icon}>🔍</div>
+                <div className={styles.tip_text}>Explore 8 different categories</div>
               </div>
-              <div className="tip">
-                <div className="tip-icon">📍</div>
-                <div className="tip-text">View details and locations</div>
+              <div className={styles.tip}>
+                <div className={styles.tip_icon}>📍</div>
+                <div className={styles.tip_text}>View details and locations</div>
               </div>
             </div>
           </div>
@@ -310,16 +311,16 @@ const NearbySearch = () => {
       </main>
 
       {activePlace && (
-        <div className="modal-overlay" onClick={closePlaceDetails}>
-          <div className="place-modal" onClick={e => e.stopPropagation()}>
-            <button className="close-modal" onClick={closePlaceDetails}>
+        <div className={styles.modal_overlay} onClick={closePlaceDetails}>
+          <div className={styles.place_modal} onClick={e => e.stopPropagation()}>
+            <button className={styles.close_modal} onClick={closePlaceDetails}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
             
-            <div className="modal-image">
+            <div className={styles.modal_image}>
               {activePlace.photo_reference ? (
                 <img 
                   src={`http://localhost:8000/place-photo?photo_reference=${activePlace.photo_reference}`}
@@ -334,39 +335,39 @@ const NearbySearch = () => {
               )}
             </div>
             
-            <div className="modal-content">
-              <h2 className="modal-title">{activePlace.name}</h2>
+            <div className={styles.modal_content}>
+              <h2 className={styles.modal_title}>{activePlace.name}</h2>
               
-              <div className="modal-stats">
-                <div className="modal-rating">
+              <div className={styles.modal_stats}>
+                <div className={styles.modal_rating}>
                   {getStarRating(activePlace.rating)}
-                  <span className="modal-reviews">({activePlace.user_ratings_total || 0} reviews)</span>
+                  <span className={styles.modal_reviews}>({activePlace.user_ratings_total || 0} reviews)</span>
                 </div>
                 
                 {activePlace.price_level !== undefined && (
-                  <div className="modal-price">
+                  <div className={styles.modal_price}>
                     {getPriceLevel(activePlace.price_level)}
                   </div>
                 )}
               </div>
               
-              <div className="modal-info">
-                <div className="info-item">
-                  <div className="info-icon">
+              <div className={styles.modal_info}>
+                <div className={styles.info_item}>
+                  <div className={styles.info_icon}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                       <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                   </div>
-                  <div className="info-text">
-                    <span className="info-label">Address</span>
-                    <span className="info-value">{activePlace.address}</span>
+                  <div className={styles.info_text}>
+                    <span className={styles.info_label}>Address</span>
+                    <span className={styles.info_value}>{activePlace.address}</span>
                   </div>
                 </div>
                 
                 {activePlace.business_status && (
-                  <div className="info-item">
-                    <div className="info-icon">
+                  <div className={styles.info_item}>
+                    <div className={styles.info_icon}>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -374,9 +375,9 @@ const NearbySearch = () => {
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                       </svg>
                     </div>
-                    <div className="info-text">
-                      <span className="info-label">Status</span>
-                      <span className={`info-value status-${activePlace.business_status.toLowerCase()}`}>
+                    <div className={styles.info_text}>
+                      <span className={styles.info_label}>Status</span>
+                      <span className={`${styles["info_value"]} ${styles[`status_${activePlace.business_status.toLowerCase()}`]}`}>
                         {activePlace.business_status.replace(/_/g, " ")}
                       </span>
                     </div>
@@ -384,16 +385,16 @@ const NearbySearch = () => {
                 )}
                 
                 {activePlace.open_now !== undefined && (
-                  <div className="info-item">
-                    <div className="info-icon">
+                  <div className={styles.info_item}>
+                    <div className={styles.info_icon}>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                       </svg>
                     </div>
-                    <div className="info-text">
-                      <span className="info-label">Currently</span>
-                      <span className={`info-value ${activePlace.open_now ? 'status-open' : 'status-closed'}`}>
+                    <div className={styles.info_text}>
+                      <span className={styles.info_label}>Currently</span>
+                      <span className={`${styles["info_value"]} ${activePlace.open_now ? styles["status_open"] : styles["status_closed"]}`}>
                         {activePlace.open_now ? 'Open Now' : 'Closed'}
                       </span>
                     </div>
@@ -402,11 +403,11 @@ const NearbySearch = () => {
               </div>
               
               {activePlace.types && activePlace.types.length > 0 && (
-                <div className="modal-tags">
+                <div className={styles.modal_tags}>
                   <h4>Place Types</h4>
-                  <div className="tags-container">
+                  <div className={styles.tags_container}>
                     {activePlace.types.map((type, index) => (
-                      <span key={index} className="place-tag">
+                      <span key={index} className={styles.place_tag}>
                         {type.replace(/_/g, " ")}
                       </span>
                     ))}
@@ -415,12 +416,12 @@ const NearbySearch = () => {
               )}
               
               {activePlace.location && (
-                <div className="modal-actions">
+                <div className={styles.modal_actions}>
                   <a 
                     href={`https://www.google.com/maps/search/?api=1&query=${activePlace.location.lat},${activePlace.location.lng}`}
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="map-link"
+                    className={styles.map_link}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
@@ -436,10 +437,10 @@ const NearbySearch = () => {
         </div>
       )}
 
-      <footer className="app-footer">
-        <div className="footer-content">
-          <p className="copyright">© {new Date().getFullYear()} WanderLust | Discover the world, one place at a time</p>
-          <div className="footer-links">
+      <footer className={styles.app_footer}>
+        <div className={styles.footer_content}>
+          <p className={styles.copyright}>© {new Date().getFullYear()} WanderLust | Discover the world, one place at a time</p>
+          <div className={styles.footer_links}>
           </div>
         </div>
       </footer>

@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Calendar, Compass, Truck, RefreshCw, Send, ArrowRight, Loader, ClipboardList } from 'lucide-react';
-import './journey_curator.css';
+import styles from './journey_curator.module.css';
 
 const Chat = () => {
   const [currentStep, setCurrentStep] = useState('destination');
@@ -59,12 +59,14 @@ const Chat = () => {
   };
 
   // Themes configuration
-  const themes = {
-    aurora: 'theme-aurora',
-    sunset: 'theme-sunset',
-    ocean: 'theme-ocean',
-    forest: 'theme-forest'
+  const themesMap = {
+    aurora: styles.themeAurora,
+    sunset: styles.themeSunset,
+    ocean: styles.themeOcean,
+    forest: styles.themeForest
   };
+  
+ 
 
   // Calculate progress based on current step
   useEffect(() => {
@@ -168,43 +170,43 @@ const Chat = () => {
     const hasDays = days.length > 1;
 
     return (
-      <div className="summary-container">
-        <div className="summary-card">
-          <div className="summary-header">
+      <div className={styles.summaryContainer}>
+        <div className={styles.summaryCard}>
+          <div className={styles.summaryHeader}>
             <h2>Your Personalized Travel Plan</h2>
-            <div className="summary-badge">Dream Journey</div>
+            <div className={styles.summaryBadge}>Dream Journey</div>
           </div>
-          <div className="summary-content">
-            <div className="summary-overview">
+          <div className={styles.summaryContent}>
+            <div className={styles.summaryOverview}>
               <h3>Trip Details</h3>
-              <div className="trip-details">
-                <div className="detail-item">
+              <div className={styles.tripDetails}>
+                <div className={styles.detailItem}>
                   <MapPin size={16} />
                   <span>From: {allInputs.origin}</span>
                 </div>
-                <div className="detail-item">
+                <div className={styles.detailItem}>
                   <MapPin size={16} />
                   <span>To: {allInputs.destination}</span>
                 </div>
-                <div className="detail-item">
+                <div className={styles.detailItem}>
                   <Calendar size={16} />
                   <span>Duration: {allInputs.days} days</span>
                 </div>
-                <div className="detail-item">
+                <div className={styles.detailItem}>
                   <Compass size={16} />
                   <span>Style: {allInputs.mood}</span>
                 </div>
-                <div className="detail-item">
+                <div className={styles.detailItem}>
                   <Truck size={16} />
                   <span>Transport: {allInputs.route}</span>
                 </div>
               </div>
             </div>
             
-            <div className="daily-summaries">
+            <div className={styles.dailySummaries}>
               {hasDays ? (
                 days.map((day, index) => (
-                  <div key={index} className="day-summary">
+                  <div key={index} className={styles.daySummary}>
                     <h3>Day {index + 1}</h3>
                     {day.split('\n').map((line, i) => (
                       line.trim() ? <p key={i}>{line.trim()}</p> : null
@@ -212,7 +214,7 @@ const Chat = () => {
                   </div>
                 ))
               ) : (
-                <div className="general-summary">
+                <div className={styles.generalSummary}>
                   {summary.split('\n').map((line, i) => (
                     line.trim() ? <p key={i}>{line.trim()}</p> : null
                   ))}
@@ -220,7 +222,7 @@ const Chat = () => {
               )}
             </div>
           </div>
-          <div className="summary-footer">
+          <div className={styles.summaryFooter}>
             <button className="new-plan-btn" onClick={resetConversation}>
               <RefreshCw size={16} />
               <span>Create New Plan</span>
@@ -233,105 +235,105 @@ const Chat = () => {
 // Replace the existing return statement with:
 
 return (
-  <div className={`travel-planner ${themes[theme]}`}>
-    <div className="theme-switcher">
+ <div className={`${styles.travelPlanner} ${themesMap[theme]}`}>
+    <div className={styles.themeSwitcher}>
       <button 
-        className={`theme-btn aurora ${theme === 'aurora' ? 'active' : ''}`} 
+        className={`${styles.themeBtn} ${styles.aurora} ${theme === 'aurora' ? styles.active : ''}`} 
         onClick={() => handleThemeChange('aurora')}
         title="Aurora Theme"
       ></button>
       <button 
-        className={`theme-btn sunset ${theme === 'sunset' ? 'active' : ''}`} 
+        className={`${styles.themeBtn} ${styles.sunset} ${theme === 'sunset' ? styles.active : ''}`}
         onClick={() => handleThemeChange('sunset')}
         title="Sunset Theme"
       ></button>
       <button 
-        className={`theme-btn ocean ${theme === 'ocean' ? 'active' : ''}`} 
+        className={`${styles.themeBtn} ${styles.ocean} ${theme === 'ocean' ? styles.active : ''}`}
         onClick={() => handleThemeChange('ocean')}
         title="Ocean Theme"
       ></button>
       <button 
-        className={`theme-btn forest ${theme === 'forest' ? 'active' : ''}`} 
+        className={`${styles.themeBtn} ${styles.forest} ${theme === 'forest' ? styles.active : ''}`}
         onClick={() => handleThemeChange('forest')}
         title="Forest Theme"
       ></button>
     </div>
 
-    <div className="container">
-      <div className="sidebar">
-        <div className="app-title">
+    <div className={styles.container}>
+      <div className={styles.sidebar}>
+        <div className={styles.appTitle}>
           <h1>Wanderlust</h1>
           <p>Your personal journey creator</p>
         </div>
         
-        <div className="progress-container">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+        <div className={styles.progressContainer}>
+          <div className={styles.progressBar}>
+            <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
           </div>
-          <p className="progress-text">{Math.round(progress)}% completed</p>
+          <p className={styles.progressText}>{Math.round(progress)}% completed</p>
         </div>
         
-        <div className="steps-container">
+        <div className={styles.stepsContainer}>
           {Object.entries(steps).map(([key, step]) => (
             <div 
               key={key} 
-              className={`step-item ${Object.keys(steps).indexOf(key) <= Object.keys(steps).indexOf(currentStep) ? 'active' : ''}`}
+              className={`${styles.stepItem} ${Object.keys(steps).indexOf(key) <= Object.keys(steps).indexOf(currentStep) ? styles.active : ''}`}
             >
-              <div className="step-icon">{step.icon}</div>
-              <div className="step-info">
-                <div className="step-title">{step.title}</div>
+              <div className={styles.stepIcon}>{step.icon}</div>
+              <div className={styles.stepInfo}>
+                <div className={styles.stepTitle}>{step.title}</div>
               </div>
             </div>
           ))}
         </div>
         
-        <button className="reset-btn" onClick={resetConversation}>
+        <button className={styles.resetBtn} onClick={resetConversation}>
           <RefreshCw size={16} />
           <span>New Journey</span>
         </button>
       </div>
       
-      <div className="main-content">
+      <div className={styles.mainContent}>
         {showSummary ? (
           renderSummary()
         ) : (
           <>
-            <div className="messages-container">
-              <div className="messages">
+            <div className={styles.messagesContainer}>
+              <div className={styles.messages}>
                 {messages.map((message, index) => (
                   <div 
                     key={index} 
-                    className={`message ${message.role}`}
+                    className={`${styles.message} ${styles[message.role]}`}
                   >
                     {message.role === 'assistant' && (
-                      <div className="assistant-avatar">JC</div>
+                      <div className={styles.assistantAvatar}>JC</div>
                     )}
-                    <div className="message-content">
+                    <div className={styles.messageContent}>
                       {message.content}
                     </div>
                     {message.role === 'user' && (
-                      <div className="user-avatar">YOU</div>
+                      <div className={styles.userAvatar}>YOU</div>
                     )}
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="message assistant">
-                    <div className="assistant-avatar">JC</div>
-                    <div className="message-content loading">
-                      <div className="dot-typing"></div>
+                    <div className={`${styles.message} ${styles.assistant}`}>
+                      <div className={styles.assistantAvatar}>JC</div>
+                      <div className={`${styles.messageContent} ${styles.loading}`}>
+                        <div className={styles.dotTyping}></div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 <div ref={messagesEndRef} />
               </div>
             </div>
             
-            <div className="input-container">
-              <div className="current-step-indicator">
-                <div className="step-icon">{steps[currentStep].icon}</div>
+            <div className={styles.inputContainer}>
+              <div className={styles.currentStepIndicator}>
+                <div className={styles.stepIcon}>{steps[currentStep].icon}</div>
                 <span>{steps[currentStep].title}</span>
               </div>
-              <div className="input-field">
+              <div className={styles.inputField}>
                 <input
                   type="text"
                   value={userInput}
@@ -341,11 +343,11 @@ return (
                   disabled={isLoading}
                 />
                 <button
-                  className="send-btn"
+                  className={styles.sendBtn}
                   onClick={handleSendMessage}
                   disabled={isLoading || !userInput.trim()}
                 >
-                  {isLoading ? <Loader size={18} className="spinner" /> : <Send size={18} />}
+                  {isLoading ? <Loader size={18} className={styles.spinner} /> : <Send size={18} />}
                 </button>
               </div>
             </div>
@@ -354,7 +356,9 @@ return (
       </div>
     </div>
   </div>
-);};
+)
+};
+
 
 export default Chat;
   

@@ -1,7 +1,7 @@
 /* Restaurant.css */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-.restaurant-container {
+.restaurantContainer {
   font-family: 'Poppins', sans-serif;
   max-width: 1200px;
   margin: 0 auto;
@@ -10,7 +10,7 @@
 }
 
 /* Search Section */
-.search-section {
+.searchSection {
   text-align: center;
   margin-bottom: 3rem;
   padding: 3rem 1rem;
@@ -19,7 +19,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-.search-section h1 {
+.searchSection h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -35,7 +35,7 @@
   margin-bottom: 2rem;
 }
 
-.search-box {
+.searchBox {
   display: flex;
   max-width: 600px;
   margin: 0 auto;
@@ -45,7 +45,7 @@
   background-color: white;
 }
 
-.search-input {
+.searchInput {
   flex: 1;
   padding: 1rem 1.5rem;
   border: none;
@@ -53,7 +53,7 @@
   outline: none;
 }
 
-.search-button {
+.searchButton {
   background: linear-gradient(90deg, #3182ce 0%, #2c5282 100%);
   color: white;
   border: none;
@@ -67,12 +67,12 @@
   transition: all 0.3s ease;
 }
 
-.search-button:hover {
+.searchButton:hover {
   background: linear-gradient(90deg, #2c5282 0%, #3182ce 100%);
 }
 
 /* Loading State */
-.loading-container {
+.loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -80,7 +80,7 @@
   min-height: 200px;
 }
 
-.loading-spinner {
+.loadingSpinner {
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -96,7 +96,7 @@
   }
 }
 
-.no-results {
+.noResults {
   text-align: center;
   padding: 3rem;
   background-color: #f7fafc;
@@ -105,30 +105,30 @@
 }
 
 /* Results Section */
-.results-container {
+.resultsContainer {
   margin-top: 2rem;
 }
 
-.results-container h2 {
+.resultsContainer h2 {
   font-size: 1.8rem;
   font-weight: 600;
   color: #2d3748;
   margin-bottom: 0.5rem;
 }
 
-.result-count {
+.resultCount {
   color: #718096;
   margin-bottom: 1.5rem;
 }
 
-.restaurants-grid {
+.restaurantsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
 }
 
 /* Restaurant Card */
-.restaurant-card {
+.restaurantCard {
   background-color: white;
   border-radius: 16px;
   overflow: hidden;
@@ -136,29 +136,29 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.restaurant-card:hover {
+.restaurantCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
-.card-image {
+.cardImage {
   height: 200px;
   position: relative;
   overflow: hidden;
 }
 
-.card-image img {
+.cardImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
 
-.restaurant-card:hover .card-image img {
+.restaurantCard:hover .cardImage img {
   transform: scale(1.05);
 }
 
-.placeholder-image {
+.placeholderImage {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fd 100%);
@@ -184,15 +184,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.star-icon {
+.starIcon {
   color: #f6ad55;
 }
 
-.card-content {
+.cardContent {
   padding: 1.5rem;
 }
 
-.card-content h3 {
+.cardContent h3 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -206,7 +206,7 @@
   margin-bottom: 1rem;
 }
 
-.pin-icon {
+.pinIcon {
   color: #3182ce;
   flex-shrink: 0;
   margin-top: 3px;
@@ -218,14 +218,14 @@
   line-height: 1.4;
 }
 
-.types-container {
+.typesContainer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 1rem;
 }
 
-.type-badge {
+.typeBadge {
   background-color: #ebf8ff;
   color: #3182ce;
   border-radius: 50px;
@@ -236,45 +236,45 @@
   gap: 4px;
 }
 
-.type-icon {
+.typeIcon {
   width: 14px;
   height: 14px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .search-section {
+  .searchSection {
     padding: 2rem 1rem;
   }
   
-  .search-section h1 {
+  .searchSection h1 {
     font-size: 2rem;
   }
   
-  .restaurants-grid {
+  .restaurantsGrid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .search-box {
+  .searchBox {
     flex-direction: column;
     border-radius: 12px;
   }
   
-  .search-input {
+  .searchInput {
     width: 100%;
     border-radius: 12px 12px 0 0;
   }
   
-  .search-button {
+  .searchButton {
     width: 100%;
     justify-content: center;
     border-radius: 0 0 12px 12px;
   }
   
-  .restaurants-grid {
+  .restaurantsGrid {
     grid-template-columns: 1fr;
   }
 }

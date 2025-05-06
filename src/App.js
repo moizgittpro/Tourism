@@ -1,37 +1,93 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navigation from './components/Navigation';
-import HomePage from './pages/HomePage';
-import DestinationExplorer from './pages/DestinationExplorer';
-import DetailedDestination from './pages/DetailedDestination';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Tours from './pages/Tours';
-import Chat from './pages/Chat';
-import FlightSearchApp from './pages/Flight';
-import Restaurant from './pages/Restaurant';
-import NearbySearch from './pages/NearbySearch';
+
+const Navigation          = React.lazy(() => import('./components/Navigation'));
+const HomePage            = React.lazy(() => import('./pages/HomePage'));
+const DestinationExplorer = React.lazy(() => import('./pages/DestinationExplorer'));
+const DetailedDestination = React.lazy(() => import('./pages/DetailedDestination'));
+const About               = React.lazy(() => import('./pages/About'));
+const Contact             = React.lazy(() => import('./pages/Contact'));
+const Tours               = React.lazy(() => import('./pages/Tours'));
+const Chat                = React.lazy(() => import('./pages/Chat'));
+const FlightSearchApp     = React.lazy(() => import('./pages/Flight'));
+const Restaurant          = React.lazy(() => import('./pages/Restaurant'));
+const NearbySearch        = React.lazy(() => import('./pages/NearbySearch'));
+const AccommodationSearch = React.lazy(() => import('./pages/AccomodationSearch'));
+
+// Loading spinner component for Suspense fallback
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen">
-        <Navigation />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/explore" element={<DestinationExplorer />} />
-          <Route path="/destination/:id" element={<DetailedDestination />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/NearbySearch" element={<NearbySearch />} />
-          <Route path="/Chat" element={<Chat />} />
-          <Route path="/Flight" element={<FlightSearchApp />} />
-          <Route path="/Restaurant" element={<Restaurant />} />
-          <Route path="/tours" element={<Tours />} />
-        </Routes>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Navigation />
+          <Routes>
+            <Route path="/" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <HomePage />
+              </Suspense>
+            } />
+            <Route path="/explore" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <DestinationExplorer />
+              </Suspense>
+            } />
+            <Route path="/destination/:id" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <DetailedDestination />
+              </Suspense>
+            } />
+            <Route path="/about" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <About />
+              </Suspense>
+            } />
+            <Route path="/contact" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Contact />
+              </Suspense>
+            } />
+            <Route path="/NearbySearch" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <NearbySearch />
+              </Suspense>
+            } />
+            <Route path="/Chat" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Chat />
+              </Suspense>
+            } />
+            <Route path="/Accomodations" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AccommodationSearch />
+              </Suspense>
+            } />
+            <Route path="/Flight" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <FlightSearchApp />
+              </Suspense>
+            } />
+            <Route path="/Restaurant" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Restaurant />
+              </Suspense>
+            } />
+            <Route path="/tours" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <Tours />
+              </Suspense>
+            } />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );
 }
 
-export default App; 
+export default App;

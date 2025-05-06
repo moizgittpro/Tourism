@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './restaurant.css';
+import styles from './restaurant.module.css';
 import { Search, MapPin, Star, Coffee, Utensils } from 'lucide-react';
 
 // WORKS BUT API KEY IS LEAKED .. 
@@ -52,26 +52,26 @@ const Restaurant = () => {
 
   // Function to get icon based on restaurant type
   const getTypeIcon = (type) => {
-    if (type.toLowerCase().includes('cafe')) return <Coffee className="type-icon" />;
-    return <Utensils className="type-icon" />;
+    if (type.toLowerCase().includes('cafe')) return <Coffee className={styles.typeIcon} />;
+    return <Utensils className={styles.typeIcon} />;
   };
 
   return (
-    <div className="restaurant-container">
-      <div className="search-section">
+    <div className={styles.restaurantContainer}>
+      <div className={styles.searchSection}>
         <h1>Discover Amazing Restaurants</h1>
-        <p className="subtitle">Find the best dining experiences in your city</p>
+        <p className={styles.subtitle}>Find the best dining experiences in your city</p>
         
-        <div className="search-box">
+        <div className={styles.searchBox}>
           <input
             type="text"
             value={city}
             onChange={handleCityChange}
             onKeyPress={handleKeyPress}
             placeholder="Enter city name..."
-            className="search-input"
+            className={styles.searchInput}
           />
-          <button onClick={handleSearch} className="search-button">
+          <button onClick={handleSearch} className={styles.searchButton}>
             <Search size={20} />
             <span>Search</span>
           </button>
@@ -79,27 +79,27 @@ const Restaurant = () => {
       </div>
 
       {isLoading && (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
           <p>Finding restaurants in {city}...</p>
         </div>
       )}
 
       {!isLoading && isSearched && restaurants.length === 0 && (
-        <div className="no-results">
+        <div className={styles.noResults}>
           <p>No restaurants found in {city}. Try another city!</p>
         </div>
       )}
 
       {!isLoading && restaurants.length > 0 && (
-        <div className="results-container">
+        <div className={styles.resultsContainer}>
           <h2>Restaurants in {city}</h2>
-          <p className="result-count">Found {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}</p>
+          <p className={styles.resultCount}>Found {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}</p>
           
-          <div className="restaurants-grid">
+          <div className={styles.restaurantsGrid}>
             {restaurants.map((restaurant) => (
-              <div key={restaurant._id} className="restaurant-card">
-                <div className="card-image">
+              <div key={restaurant._id} className={styles.restaurantCard}>
+                <div className={styles.cardImage}>
                   {restaurant.image ? (
                     <>
                     <img
@@ -112,27 +112,27 @@ const Restaurant = () => {
                     />
                   </>
                   ) : (
-                    <div className="placeholder-image">
+                    <div className={styles.placeholderImage}>
                       <Utensils size={40} />
                     </div>
                   )}
-                  <div className="rating">
-                    <Star className="star-icon" size={16} />
+                  <div className={styles.rating}>
+                    <Star className={styles.starIcon} size={16} />
                     <span>{restaurant.rating.toFixed(1)}</span>
                   </div>
                 </div>
                 
-                <div className="card-content">
+                <div className={styles.cardContent}>
                   <h3>{restaurant.name}</h3>
-                  <div className="address">
-                    <MapPin size={16} className="pin-icon" />
+                  <div className={styles.address}>
+                    <MapPin size={16} className={styles.pinIcon} />
                     <p>{restaurant.address}</p>
                   </div>
                   
                   {restaurant.types && restaurant.types.length > 0 && (
-                    <div className="types-container">
+                    <div className={styles.typesContainer}>
                       {restaurant.types.slice(0, 3).map((type, index) => (
-                        <span key={index} className="type-badge">
+                        <span key={index} className={styles.typeBadge}>
                           {getTypeIcon(type)}
                           {type}
                         </span>

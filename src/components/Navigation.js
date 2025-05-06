@@ -19,14 +19,13 @@ const Navigation = () => {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/explore', label: 'Explore' },
-    { path: '/destinations', label: 'Destinations' },
-    { path: '/tours', label: 'Tours' },
     { path: '/about', label: 'About' },
     { path: '/contact', label: 'Contact' },
     { path: '/nearbysearch', label: 'Search' },
     { path: '/flight', label: 'Flight' },
     { path: '/restaurant', label: 'Restaurant' },
-    {path : '/chat',label : 'Chat'}
+    {path : '/chat',label : 'Chat'},
+    {path : '/Accomodations',label : 'Accomodations'}
   ];
 
   return (

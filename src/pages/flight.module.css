@@ -15,19 +15,19 @@ body {
   line-height: 1.6;
 }
 
-.flight-search-container {
+.flightSearchContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
 /* Header Styles */
-.app-header {
+.appHeader {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.app-header h1 {
+.appHeader h1 {
   font-size: 2.5rem;
   font-weight: 700;
   color: #3a86ff;
@@ -37,18 +37,18 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.plane-icon {
+.planeIcon {
   margin-right: 0.75rem;
   transform: rotate(45deg);
 }
 
-.app-header p {
+.appHeader p {
   font-size: 1.1rem;
   color: #6c757d;
 }
 
 /* Search Card Styles */
-.search-card {
+.searchCard {
   background-color: white;
   border-radius: 16px;
   padding: 2rem;
@@ -56,25 +56,25 @@ body {
   margin-bottom: 2rem;
 }
 
-.form-fields {
+.formFields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
   align-items: end;
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
 }
 
-.form-group label {
+.formGroup label {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #495057;
 }
 
-.text-input, .date-input {
+.textInput, .dateInput {
   padding: 0.75rem 1rem;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -86,13 +86,13 @@ body {
   width: 100%;
 }
 
-.text-input:focus, .date-input:focus {
+.textInput:focus, .dateInput:focus {
   outline: none;
   border-color: #3a86ff;
   box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
 }
 
-.search-button {
+.searchButton {
   background-color: #3a86ff;
   color: white;
   border: none;
@@ -108,16 +108,16 @@ body {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-.search-button:hover {
+.searchButton:hover {
   background-color: #2667c9;
 }
 
-.search-button:active {
+.searchButton:active {
   transform: translateY(1px);
 }
 
 /* Error Message */
-.error-message {
+.errorMessage {
   margin-top: 1rem;
   color: #e63946;
   font-size: 0.9rem;
@@ -125,7 +125,7 @@ body {
 }
 
 /* Loading Styles */
-.loading-container {
+.loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -148,47 +148,47 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-.loading-container p {
+.loadingContainer p {
   color: #6c757d;
   font-size: 1rem;
 }
 
 /* Results Container */
-.results-container {
+.resultsContainer {
   margin-top: 3rem;
 }
 
-.results-container h2 {
+.resultsContainer h2 {
   font-size: 1.75rem;
   margin-bottom: 1.5rem;
   color: #343a40;
   text-align: center;
 }
 
-.airline-group {
+.airlineGroup {
   margin-bottom: 2rem;
 }
 
-.airline-header {
+.airlineHeader {
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e9ecef;
 }
 
-.airline-header h3 {
+.airlineHeader h3 {
   font-size: 1.25rem;
   color: #495057;
   font-weight: 600;
 }
 
-.flights-grid {
+.flightsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
 /* Flight Card Styles */
-.flight-card {
+.flightCard {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -198,16 +198,16 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.flight-card:hover {
+.flightCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.best-flight {
+.bestFlight {
   border: 2px solid #4cc9f0;
 }
 
-.best-badge {
+.bestBadge {
   position: absolute;
   top: 0;
   right: 0;
@@ -222,13 +222,13 @@ body {
   gap: 0.25rem;
 }
 
-.flight-header {
+.flightHeader {
   display: flex;
   align-items: center;
   margin-bottom: 1.25rem;
 }
 
-.airline-logo {
+.airlineLogo {
   width: 36px;
   height: 36px;
   background-color: #e9ecef;
@@ -241,12 +241,12 @@ body {
   margin-right: 0.75rem;
 }
 
-.airline-name {
+.airlineName {
   font-weight: 600;
   color: #343a40;
 }
 
-.flight-time-container {
+.flightTimeContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -268,7 +268,7 @@ body {
   color: #6c757d;
 }
 
-.flight-line {
+.flightLine {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -276,7 +276,7 @@ body {
   padding: 0 1rem;
 }
 
-.flight-duration {
+.flightDuration {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -318,7 +318,7 @@ body {
   margin-top: 0.25rem;
 }
 
-.flight-footer {
+.flightFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -334,7 +334,7 @@ body {
   color: #212529;
 }
 
-.book-btn {
+.bookBtn {
   background-color: #3a86ff;
   color: white;
   border: none;
@@ -346,7 +346,7 @@ body {
   transition: background-color 0.2s;
 }
 
-.book-btn:hover {
+.bookBtn:hover {
   background-color: #2667c9;
 }
 
@@ -362,23 +362,23 @@ body {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .flight-search-container {
+  .flight-searchContainer {
     padding: 1rem;
   }
   
-  .search-card {
+  .searchCard {
     padding: 1.5rem;
   }
   
-  .form-fields {
+  .formFields {
     grid-template-columns: 1fr;
   }
   
-  .flights-grid {
+  .flightsGrid {
     grid-template-columns: 1fr;
   }
   
-  .app-header h1 {
+  .appHeader h1 {
     font-size: 2rem;
   }
 }
