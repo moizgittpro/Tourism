@@ -31,7 +31,7 @@ async def flight(request: Request):
     
     result = get_flights(
             flight_data=[
-            FlightData(date=date, from_airport=to_airport, to_airport=from_airport)
+            FlightData(date=date, from_airport=from_airport, to_airport=to_airport)
         ],
         trip="one-way",
         seat="economy",
