@@ -33,3 +33,6 @@
 ---
 
  Focus: Ensure the chatbot summary is informative, structured, and includes all relevant travel data.
+
+
+mongod --dbpath /Users/robbannn/mongodb-data

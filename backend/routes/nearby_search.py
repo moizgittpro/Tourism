@@ -74,3 +74,46 @@ async def get_data(request: Request):
             status_code=500,
             content={"error": f"Server error: {str(e)}"}
         )
+
+
+def get_data_sync(collection_name: str, city: str):
+    try:
+        # Validate inputs
+        if not collection_name or not city:
+            return {"error": "Both collection and city are required"}
+
+        if collection_name not in COLLECTIONS:
+            return {"error": f"Invalid collection: {collection_name}"}
+
+        # Get collection and query data
+        collection = db[collection_name]
+        query = {"city": {"$regex": f"^{city}$", "$options": "i"}}
+        
+        # Project only required fields
+        projection = {
+            "place_id": 1,
+            "name": 1,
+            "types": 1,
+            "location": 1,
+            "address": 1,
+            "rating": 1,
+            "user_ratings_total": 1,
+            "open_now": 1,
+            "photo_reference": 1,
+            "icon": 1,
+            "business_status": 1,
+            "price_level": 1,
+            "city": 1
+        }
+
+        # Find documents
+        results = list(collection.find(query, projection))
+
+        # Convert ObjectId to string
+        for result in results:
+            result["_id"] = str(result["_id"])
+
+        return results
+
+    except Exception as e:
+        return {"error": f"Server error: {str(e)}"}

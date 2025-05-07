@@ -1,364 +1,342 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Calendar, Compass, Truck, RefreshCw, Send, ArrowRight, Loader, ClipboardList } from 'lucide-react';
-import styles from './journey_curator.module.css';
+import './journey_curator.css';
 
-const Chat = () => {
-  const [currentStep, setCurrentStep] = useState('destination');
-  const [userInput, setUserInput] = useState('');
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I can help you plan your trip. Please tell me your destination.' }
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  const [summary, setSummary] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [theme, setTheme] = useState('aurora');
-  const [allInputs, setAllInputs] = useState({});
-  const messagesEndRef = useRef(null);
+// Message component for chat bubbles
+const Message = ({ message, sender }) => {
+  return (
+    <div className={`message ${sender}`}>
+      <div className="message-content">
+        {message}
+      </div>
+    </div>
+  );
+};
 
-  // Define steps and their configurations
-  const steps = {
-    destination: {
-      icon: <MapPin />,
-      title: 'Destination',
-      placeholder: 'Where are you going?',
-      emoji: '🏝️'
-    },
-    origin: {
-      icon: <MapPin />,
-      title: 'Origin',
-      placeholder: 'Where are you starting from?',
-      emoji: '🏠'
-    },
-    days: {
-      icon: <Calendar />,
-      title: 'Duration',
-      placeholder: 'How many days?',
-      emoji: '📅'
-    },
-    mood: {
-      icon: <Compass />,
-      title: 'Travel Mood',
-      placeholder: 'Adventure, Relaxation, Historical...',
-      emoji: '🌈'
-    },
-    route: {
-      icon: <Truck />,
-      title: 'Transportation',
-      placeholder: 'Car, Train, Plane...',
-      emoji: '🚗'
-    },
-    summary: {
-      icon: <ClipboardList />,
-      title: 'Summary',
-      placeholder: '',
-      emoji: '✨'
-    }
-  };
+// Typing indicator component
+const TypingIndicator = () => {
+  return (
+    <div className="message bot">
+      <div className="message-content typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  );
+};
 
-  // Themes configuration
-  const themesMap = {
-    aurora: styles.themeAurora,
-    sunset: styles.themeSunset,
-    ocean: styles.themeOcean,
-    forest: styles.themeForest
-  };
+// Trip summary card components
+const FlightCard = ({ flight }) => {
+  return (
+    <div className="summary-card flight-card">
+      <div className="card-header">
+        <i className="fa-solid fa-plane"></i>
+        <h3>{flight.name || "Flight"}</h3>
+        {flight.is_best && <span className="best-badge">Best Value</span>}
+      </div>
+      <div className="card-content">
+        <div className="flight-time">
+          <div className="departure">
+            <span className="time">{flight.departure || "N/A"}</span>
+          </div>
+          <div className="flight-duration">
+            <span className="duration-line"></span>
+            <span>{flight.duration || "N/A"}</span>
+          </div>
+          <div className="arrival">
+            <span className="time">{flight.arrival || "N/A"}</span>
+          </div>
+        </div>
+        <div className="flight-details">
+          <p><strong>Stops:</strong> {flight.stops || "Direct"}</p>
+          <p className="price"><strong>Price:</strong> ${flight.price || "N/A"}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RestaurantCard = ({ restaurant }) => {
+  return (
+    <div className="summary-card restaurant-card">
+      <div className="card-header">
+        <i className="fa-solid fa-utensils"></i>
+        <h3>{restaurant.name || "Restaurant"}</h3>
+      </div>
+      <div className="card-content">
+        <div className="restaurant-image">
+          {restaurant.image ? 
+            <img src={restaurant.image} alt={restaurant.name} /> : 
+            <div className="placeholder-img">No Image</div>
+          }
+        </div>
+        <div className="restaurant-details">
+          <p><strong>Address:</strong> {restaurant.address || "N/A"}</p>
+          <p><strong>Cuisine:</strong> {restaurant.types?.join(", ") || "Various"}</p>
+          <div className="rating">
+            <strong>Rating:</strong> 
+            <span className="stars">{renderStars(restaurant.rating || 0)}</span>
+            <span className="rating-value">({restaurant.rating || "N/A"})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AttractionCard = ({ attraction }) => {
+  return (
+    <div className="summary-card attraction-card">
+      <div className="card-header">
+        <i className="fa-solid fa-landmark"></i>
+        <h3>{attraction.name || "Attraction"}</h3>
+      </div>
+      <div className="card-content">
+        <div className="attraction-image">
+          {attraction.photo_reference ? 
+            <img src={attraction.photo_reference} alt={attraction.name} /> : 
+            <div className="placeholder-img">No Image</div>
+          }
+        </div>
+        <div className="attraction-details">
+          <p><strong>Address:</strong> {attraction.address || "N/A"}</p>
+          <p><strong>Type:</strong> {attraction.types?.join(", ") || "Tourist Spot"}</p>
+          <div className="rating">
+            <strong>Rating:</strong>
+            <span className="stars">{renderStars(attraction.rating || 0)}</span>
+            <span className="rating-value">({attraction.rating || "N/A"}) from {attraction.user_ratings_total || 0} reviews</span>
+          </div>
+          {attraction.open_now !== undefined && 
+            <p className={`open-status ${attraction.open_now ? "open" : "closed"}`}>
+              {attraction.open_now ? "Open Now" : "Closed"}
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Helper function to render star ratings
+const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
   
- 
-
-  // Calculate progress based on current step
-  useEffect(() => {
-    const stepIndex = Object.keys(steps).indexOf(currentStep);
-    const totalSteps = Object.keys(steps).length - 1;
-    const newProgress = (stepIndex / totalSteps) * 100;
-    setProgress(newProgress);
-    
-    if (currentStep === 'summary') {
-      setShowSummary(true);
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(<i key={i} className="fas fa-star"></i>);
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(<i key={i} className="fas fa-star-half-alt"></i>);
+    } else {
+      stars.push(<i key={i} className="far fa-star"></i>);
     }
-  }, [currentStep, steps]);
+  }
+  
+  return stars;
+};
 
-  // Scroll to bottom of messages
+// Main App component
+function Chat() {
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [currentStep, setCurrentStep] = useState('destination');
+  const [tripSummary, setTripSummary] = useState(null);
+  const [flights, setFlights] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [attractions, setAttractions] = useState([]);
+  const [showSummary, setShowSummary] = useState(false);
+  
+  const chatEndRef = useRef(null);
+
+  // Auto scroll to bottom of chat
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping]);
 
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-  };
+  // Initialize the chat
+  useEffect(() => {
+    // Show initial bot message
+    handleBotResponse("Hello! I can help you plan your trip. Please tell me your destination.");
+  }, []);
 
-  const handleSendMessage = async () => {
-    if (!userInput.trim() || isLoading) return;
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
     
-    setMessages(prev => [...prev, { role: 'user', content: userInput }]);
-    setIsLoading(true);
+    // Add user message to chat
+    const userMessage = inputText.trim();
+    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
+    setInputText('');
+    setIsTyping(true);
     
     try {
+      // Send user input to backend
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_input: userInput }),
+        body: JSON.stringify({ user_input: userMessage }),
       });
       
       const data = await response.json();
       
-      // Store input for the current step
-      setAllInputs(prev => ({
-        ...prev,
-        [currentStep]: userInput
-      }));
-
-      // Add assistant response
-      setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
-      setCurrentStep(data.step);
+      // Update current step
+      if (data.step) {
+        setCurrentStep(data.step);
+      }
       
-      // Handle summary step
-      if (data.step === 'summary') {
-        setSummary(data.message);
+      // Handle summary data if present
+      if (data.trip_summary) {
+        setTripSummary(data.trip_summary);
+        setFlights(data.flights || []);
+        setRestaurants(data.restaurants || []);
+        setAttractions(data.tourist_attractions || []);
         setShowSummary(true);
       }
       
+      // Add bot response after a short delay to simulate typing
+      setTimeout(() => {
+        setIsTyping(false);
+        handleBotResponse(data.message);
+      }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+      
     } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, there was an error processing your request.' 
-      }]);
-    } finally {
-      setIsLoading(false);
-      setUserInput('');
+      console.error('Error sending message:', error);
+      setIsTyping(false);
+      handleBotResponse("Sorry, I encountered an error. Please try again.");
     }
   };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
+  
+  // Add bot message to chat
+  const handleBotResponse = (message) => {
+    setMessages(prev => [...prev, { text: message, sender: 'bot' }]);
   };
-
-  const resetConversation = async () => {
-    setIsLoading(true);
+  
+  // Reset the conversation
+  const handleReset = async () => {
     try {
-      const response = await fetch('http://localhost:8000/reset', {
+      const response = await fetch('/reset', {
         method: 'POST',
       });
       
       const data = await response.json();
       
-      setMessages([{ role: 'assistant', content: data.message }]);
+      // Reset all states
+      setMessages([]);
       setCurrentStep('destination');
+      setTripSummary(null);
+      setFlights([]);
+      setRestaurants([]);
+      setAttractions([]);
       setShowSummary(false);
-      setSummary('');
-      setProgress(0);
-      setAllInputs({});
+      
+      // Add initial bot message
+      setTimeout(() => {
+        handleBotResponse(data.message);
+      }, 500);
       
     } catch (error) {
-      console.error('Error resetting:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error resetting conversation:', error);
+      handleBotResponse("Sorry, I couldn't reset the conversation. Please refresh the page.");
     }
   };
 
-  const renderSummary = () => {
-    if (!summary) return null;
-
-    const days = summary.split(/Day \d+:/g).filter(Boolean);
-    const hasDays = days.length > 1;
-
-    return (
-      <div className={styles.summaryContainer}>
-        <div className={styles.summaryCard}>
-          <div className={styles.summaryHeader}>
-            <h2>Your Personalized Travel Plan</h2>
-            <div className={styles.summaryBadge}>Dream Journey</div>
+  return (
+    <div className="app-container">
+      <div className="chat-container">
+        <div className="chat-header">
+          <h1>Travel Planner Bot</h1>
+          <button className="reset-button" onClick={handleReset}>
+            <i className="fas fa-redo"></i> New Trip
+          </button>
+        </div>
+        
+        <div className="chat-messages">
+          {messages.map((message, index) => (
+            <Message key={index} message={message.text} sender={message.sender} />
+          ))}
+          {isTyping && <TypingIndicator />}
+          <div ref={chatEndRef} />
+        </div>
+        
+        <form className="chat-input" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={`Enter your ${currentStep}...`}
+            disabled={showSummary}
+          />
+          <button type="submit" disabled={!inputText.trim() || showSummary}>
+            <i className="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+      
+      {showSummary && (
+        <div className="summary-container">
+          <div className="summary-header">
+            <h2>Your Trip Summary</h2>
           </div>
-          <div className={styles.summaryContent}>
-            <div className={styles.summaryOverview}>
-              <h3>Trip Details</h3>
-              <div className={styles.tripDetails}>
-                <div className={styles.detailItem}>
-                  <MapPin size={16} />
-                  <span>From: {allInputs.origin}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <MapPin size={16} />
-                  <span>To: {allInputs.destination}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <Calendar size={16} />
-                  <span>Duration: {allInputs.days} days</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <Compass size={16} />
-                  <span>Style: {allInputs.mood}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <Truck size={16} />
-                  <span>Transport: {allInputs.route}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className={styles.dailySummaries}>
-              {hasDays ? (
-                days.map((day, index) => (
-                  <div key={index} className={styles.daySummary}>
-                    <h3>Day {index + 1}</h3>
-                    {day.split('\n').map((line, i) => (
-                      line.trim() ? <p key={i}>{line.trim()}</p> : null
-                    ))}
-                  </div>
+          
+          <div className="summary-text">
+            <p>{tripSummary}</p>
+          </div>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-plane"></i> Available Flights
+            </h3>
+            <div className="cards-container">
+              {flights.length > 0 ? (
+                flights.map((flight, index) => (
+                  <FlightCard key={index} flight={flight} />
                 ))
               ) : (
-                <div className={styles.generalSummary}>
-                  {summary.split('\n').map((line, i) => (
-                    line.trim() ? <p key={i}>{line.trim()}</p> : null
-                  ))}
-                </div>
+                <p className="no-data">No flight information available</p>
               )}
             </div>
           </div>
-          <div className={styles.summaryFooter}>
-            <button className="new-plan-btn" onClick={resetConversation}>
-              <RefreshCw size={16} />
-              <span>Create New Plan</span>
-            </button>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-utensils"></i> Recommended Restaurants
+            </h3>
+            <div className="cards-container">
+              {restaurants.length > 0 ? (
+                restaurants.slice(0, 6).map((restaurant, index) => (
+                  <RestaurantCard key={index} restaurant={restaurant} />
+                ))
+              ) : (
+                <p className="no-data">No restaurant information available</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-landmark"></i> Tourist Attractions
+            </h3>
+            <div className="cards-container">
+              {attractions.length > 0 ? (
+                attractions.slice(0, 6).map((attraction, index) => (
+                  <AttractionCard key={index} attraction={attraction} />
+                ))
+              ) : (
+                <p className="no-data">No attraction information available</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
-  };
-// Replace the existing return statement with:
-
-return (
- <div className={`${styles.travelPlanner} ${themesMap[theme]}`}>
-    <div className={styles.themeSwitcher}>
-      <button 
-        className={`${styles.themeBtn} ${styles.aurora} ${theme === 'aurora' ? styles.active : ''}`} 
-        onClick={() => handleThemeChange('aurora')}
-        title="Aurora Theme"
-      ></button>
-      <button 
-        className={`${styles.themeBtn} ${styles.sunset} ${theme === 'sunset' ? styles.active : ''}`}
-        onClick={() => handleThemeChange('sunset')}
-        title="Sunset Theme"
-      ></button>
-      <button 
-        className={`${styles.themeBtn} ${styles.ocean} ${theme === 'ocean' ? styles.active : ''}`}
-        onClick={() => handleThemeChange('ocean')}
-        title="Ocean Theme"
-      ></button>
-      <button 
-        className={`${styles.themeBtn} ${styles.forest} ${theme === 'forest' ? styles.active : ''}`}
-        onClick={() => handleThemeChange('forest')}
-        title="Forest Theme"
-      ></button>
+      )}
     </div>
-
-    <div className={styles.container}>
-      <div className={styles.sidebar}>
-        <div className={styles.appTitle}>
-          <h1>Wanderlust</h1>
-          <p>Your personal journey creator</p>
-        </div>
-        
-        <div className={styles.progressContainer}>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
-          </div>
-          <p className={styles.progressText}>{Math.round(progress)}% completed</p>
-        </div>
-        
-        <div className={styles.stepsContainer}>
-          {Object.entries(steps).map(([key, step]) => (
-            <div 
-              key={key} 
-              className={`${styles.stepItem} ${Object.keys(steps).indexOf(key) <= Object.keys(steps).indexOf(currentStep) ? styles.active : ''}`}
-            >
-              <div className={styles.stepIcon}>{step.icon}</div>
-              <div className={styles.stepInfo}>
-                <div className={styles.stepTitle}>{step.title}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <button className={styles.resetBtn} onClick={resetConversation}>
-          <RefreshCw size={16} />
-          <span>New Journey</span>
-        </button>
-      </div>
-      
-      <div className={styles.mainContent}>
-        {showSummary ? (
-          renderSummary()
-        ) : (
-          <>
-            <div className={styles.messagesContainer}>
-              <div className={styles.messages}>
-                {messages.map((message, index) => (
-                  <div 
-                    key={index} 
-                    className={`${styles.message} ${styles[message.role]}`}
-                  >
-                    {message.role === 'assistant' && (
-                      <div className={styles.assistantAvatar}>JC</div>
-                    )}
-                    <div className={styles.messageContent}>
-                      {message.content}
-                    </div>
-                    {message.role === 'user' && (
-                      <div className={styles.userAvatar}>YOU</div>
-                    )}
-                  </div>
-                ))}
-                {isLoading && (
-                    <div className={`${styles.message} ${styles.assistant}`}>
-                      <div className={styles.assistantAvatar}>JC</div>
-                      <div className={`${styles.messageContent} ${styles.loading}`}>
-                        <div className={styles.dotTyping}></div>
-                      </div>
-                    </div>
-                  )}
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-            
-            <div className={styles.inputContainer}>
-              <div className={styles.currentStepIndicator}>
-                <div className={styles.stepIcon}>{steps[currentStep].icon}</div>
-                <span>{steps[currentStep].title}</span>
-              </div>
-              <div className={styles.inputField}>
-                <input
-                  type="text"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={steps[currentStep].placeholder}
-                  disabled={isLoading}
-                />
-                <button
-                  className={styles.sendBtn}
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !userInput.trim()}
-                >
-                  {isLoading ? <Loader size={18} className={styles.spinner} /> : <Send size={18} />}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  </div>
-)
-};
-
+  );
+}
 
 export default Chat;
-  

@@ -18,6 +18,7 @@ result: Result = get_flights(
 
 )
 
+
 for flight in result.flights:
 
     print(flight)

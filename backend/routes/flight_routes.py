@@ -57,3 +57,19 @@ async def flight(request: Request):
         })
     
     return JSONResponse(content=flights_data)
+
+
+def fetch_flight_details(from_airport: str, to_airport: str, date: str):
+    result: Result = get_flights(
+        flight_data=[
+            FlightData(date=date, from_airport=from_airport, to_airport=to_airport)
+        ],
+        trip="one-way",
+        seat="economy",
+        passengers=Passengers(adults=2, children=1, infants_in_seat=0, infants_on_lap=0),
+        fetch_mode="fallback",
+    )
+    return {
+        "flights": result.flights,
+        "current_price": result.current_price
+    }
