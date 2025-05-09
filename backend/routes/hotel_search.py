@@ -3,15 +3,13 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from opencage.geocoder import OpenCageGeocode
 import os
+from routes.connection import mongo_db, redis_client
 
 
 api_key = os.getenv("opencage_api_key")
-Client= MongoClient("mongodb://localhost:27017/")
 
-db=Client["tourism"]
-
-airbnb_collection = db["air_bnb"]
-hotel_collection = db["hotel"]
+airbnb_collection = mongo_db["air_bnb"]
+hotel_collection = mongo_db["hotel"]
 
 def get_hotel_data_for_city(request: Request):
     data = request.query_params
