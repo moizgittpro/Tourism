@@ -7,11 +7,11 @@ import os
 
 api_key = os.getenv("opencage_api_key")
 Client= MongoClient("mongodb://localhost:27017/")
-db=Client["hotel_db"]
-db2=Client["tourism"]
 
-airbnb_collection = db2["airbnb_listings"]
-hotel_collection = db["hotels"]
+db=Client["tourism"]
+
+airbnb_collection = db["air_bnb"]
+hotel_collection = db["hotel"]
 
 def get_hotel_data_for_city(request: Request):
     data = request.query_params
