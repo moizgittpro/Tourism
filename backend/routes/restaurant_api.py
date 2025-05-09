@@ -1,20 +1,18 @@
 from fastapi import FastAPI,Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 import random
+import json
+from routes.connection import mongo_db, redis_client
 load_dotenv()
 
 api_key = os.getenv("google_places_api_key")
 if not api_key:
     print("\nERROR ::: API_KEY NOT LOADED\n")
 
-Client = MongoClient("mongodb://localhost:27017/")
-
-db = Client['tourism']
-collection = db['restaurants']
+collection = mongo_db['restaurants']
 
 
 """
@@ -38,7 +36,10 @@ collection = db['restaurants']
     """
 
 def get_restaurant_by_city(city):
-
+    cache_key = f"restaurants:{city.lower()}"
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return json.loads(cached_data)
     restaurants_cursor = collection.find({
        "city": { "$regex": f"^{city}$", "$options": "i" } ## ISLAMABAD , Islmamabad , islamabad ARE ALL GOOD
         })
@@ -53,7 +54,7 @@ def get_restaurant_by_city(city):
         # res["image"] = google_image_url
         restaurants.append(res)
 
-    
+    redis_client.setex(cache_key, 3600, json.dumps(restaurants))
     return restaurants
 
 # print(get_restaurant_by_city("Islamabad"))
