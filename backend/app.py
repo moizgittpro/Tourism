@@ -34,6 +34,7 @@ app.add_api_route("/get-data",endpoint=get_data,methods=["POST","GET"])
 app.add_api_route("/chat",endpoint=chat,methods=["POST"])
 app.add_api_route("/reset",endpoint=reset_conversation,methods=["POST"])
 
+## HOTELS
 app.add_api_route("/get-hotels",endpoint=get_hotel_data_for_location,methods=["GET"])
 app.add_api_route("/get-airbnbs",endpoint=get_airbnb_data_for_location,methods=["GET"])
 
