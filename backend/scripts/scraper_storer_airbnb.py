@@ -7,6 +7,8 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['tourism']
 collection = db['airbnb_listings']
 
+collection.create_index([("location", "2dsphere")])
+
 bbox = {
     1: [
         31.1822055230568,     # North-East latitude
@@ -175,25 +177,33 @@ for key in bbox:
     for search_result in search_results:
         # Transform the data for each listing
         transformed_data = {
-            **{k: v for k, v in search_result.items() if k not in ['room_id', 'fee', 'price', 'long_stay_discount', 'rating', 'coordinates']},  # exclude unwanted fields
-            "page_id": search_result['room_id'],  # rename room_id
+            # exclude unwanted fields
+            "page_id": str(search_result['room_id']),  # rename room_id and convert to string
             "price": f"${search_result['price']['unit']['amount']}",  # simplified price with dollar symbol
-            "rating_value": search_result['rating']['value'],
+            "review_score": search_result['rating']['value'],
             "review_count": search_result['rating']['reviewCount'],
             "reviews_status": "No reviews yet" if search_result['rating']['reviewCount'] == 0 else "Reviews available",
+            "city": search_result['title'].split()[-1],  # take the last word from title
+            "image_links": [img['url'] for img in search_result['images']],  # extract only URLs from images
             "location": {
-                "latitude": search_result['coordinates']['latitude'],
-                "longitude": search_result['coordinates']['longitud'],
-                "city": search_result['title'].split()[-1],  # take the last word from title
+            "type": "Point",
+            "coordinates": [
+                search_result['coordinates']['longitud'],
+                search_result['coordinates']['latitude']
+            ]
             },
         }
 
         # Update or insert the document based on page_id
-        collection.update_one(
-            {"page_id": transformed_data["page_id"]},  # Find document by page_id
-            {"$set": transformed_data},  # Update with the new data
-            upsert=True  # If not found, insert a new document
-        )
+        try:
+            collection.update_one(
+                {"page_id": transformed_data["page_id"]},
+                {"$set": transformed_data},
+                upsert=True
+            )
+        except Exception as e:
+            print(f"Failed to update MongoDB for page_id {transformed_data['page_id']}: {e}")
 
 
-    time.sleep(4)  # Sleep for 4 seconds to avoid hitting the server too hard
+
+    time.sleep(2)  # Sleep for 4 seconds to avoid hitting the server too hard

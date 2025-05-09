@@ -377,20 +377,44 @@
   }
   
   /* Error Message */
+  .retryButton {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .retryButton:hover {
+    background-color: #0056b3;
+  }
+  
   .errorMessage {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background-color: var(--error-bg);
-    color: var(--error-text);
-    border-radius: 0.5rem;
+    text-align: center;
+    padding: 2rem;
+    background: #fff3f3;
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 400px;
   }
   
   .errorMessage svg {
-    width: 24px;
-    height: 24px;
-    margin-right: 0.5rem;
+    width: 48px;
+    height: 48px;
+    stroke: #dc3545;
+    margin-bottom: 1rem;
+  }
+  
+  .errorMessage p {
+    color: #dc3545;
+    margin-bottom: 0.5rem;
   }
   
   /* Results Section */
@@ -413,36 +437,50 @@
     font-size: 0.9rem;
   }
   
-  .accommodationsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  /* Accommodation Card */
-  .accommodationCard {
-    background-color: var(--card-bg);
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 4px 6px var(--shadow-color);
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-  }
-  
-  .accommodationCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--shadow-color);
-  }
-  
   .accommodationImage {
     position: relative;
-    height: 200px;
+    width: 100%;
+    padding-top: 100%; /* This creates a square aspect ratio */
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
   }
   
   .accommodationImage img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* This ensures the image covers the square container */
+    transition: transform 0.3s ease;
+  }
+  
+  .accommodationCard {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .accommodationsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 20px;
+  }
+  
+  .accommodationCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .accommodationCard:hover .accommodationImage img {
+    transform: scale(1.05);
   }
   
   .statusIndicator {
@@ -696,11 +734,15 @@
   }
   
   .modalImage {
+    position: relative;
     width: 100%;
-    height: 300px;
+    padding-top: 100%; /* Makes it square */
   }
   
   .modalImage img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -882,21 +924,21 @@
   
   /* Responsive */
   @media (min-width: 768px) {
-    .accommodationModal {
-      flex-direction: row;
-      max-height: 80vh;
-    }
-    
-    .modalimage {
-      width: 50%;
-      height: auto;
-    }
-    
-    .modalContent {
-      width: 50%;
-      max-height: 80vh;
-    }
+  .accommodationModal {
+    flex-direction: row;
+    max-height: 80vh;
   }
+  
+  .modalImage {
+    width: 50%;
+    padding-top: 50%; /* Keep square aspect ratio at 50% width */
+  }
+  
+  .modalContent {
+    width: 50%;
+    max-height: 80vh;
+  }
+}
   
   @media (max-width: 767px) {
     .priceFilter {

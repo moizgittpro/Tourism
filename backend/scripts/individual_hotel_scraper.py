@@ -126,21 +126,24 @@ for hotel_name in hotel_names:
 
     # Final JSON structure
     data = {
-        "hotel_name": property_title,
+        "name": property_title,
         "page_id": hotel_name,
         "description_paragraphs": paragraphs,
         "image_links": images,
         "most_popular_features": features,
-        "cheapest_price": float(price) if price else None,
+        "price": float(price) if price else None,
         "room_type": span_text,
         "review_status": review_status,
         "review_score": review_score,
         "review_count": review_count,
+        "city": city,
+        "address": address,
         "location": {
-            "latitude": latitude,
-            "longitude": longitude,
-            "address": address,
-            "city": city
+            "type": "Point",
+            "coordinates": [
+                float(longitude) if longitude else None,
+                float(latitude) if latitude else None
+            ]   
         }
     }
 

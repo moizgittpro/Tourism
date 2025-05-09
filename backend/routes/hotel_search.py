@@ -1,0 +1,156 @@
+from pymongo import MongoClient
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from opencage.geocoder import OpenCageGeocode
+import os
+
+
+api_key = os.getenv("opencage_api_key")
+Client= MongoClient("mongodb://localhost:27017/")
+db=Client["hotel_db"]
+db2=Client["tourism"]
+
+airbnb_collection = db2["airbnb_listings"]
+hotel_collection = db["hotels"]
+
+def get_hotel_data_for_city(request: Request):
+    data = request.query_params
+    city = data.get("city")
+
+    if not city:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "City parameter is required"}
+        )
+    
+    # Fetch hotel data from MongoDB
+    hotel_data = list(hotel_collection.find({"address.city": city}))
+
+    if not hotel_data:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"No hotel data found for city: {city}"}
+        )
+    
+    # Convert ObjectId to string
+    for hotel in hotel_data:
+        hotel["_id"] = str(hotel["_id"])
+    return JSONResponse(content=hotel_data)
+
+def get_airbnb_data_for_city(request: Request):
+    data = request.query_params
+    city = data.get("city")
+
+    if not city:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "City parameter is required"}
+        )
+    
+    # Fetch Airbnb data from MongoDB
+    airbnb_data = list(airbnb_collection.find({"city": city}))
+
+    if not airbnb_data:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"No Airbnb data found for city: {city}"}
+        )
+    
+    # Convert ObjectId to string
+    for airbnb in airbnb_data:
+        airbnb["_id"] = str(airbnb["_id"])
+    return JSONResponse(content=airbnb_data)
+
+def get_hotel_data_for_location(request: Request):
+    geocoder = OpenCageGeocode(api_key)
+    data = request.query_params
+    address = data.get("address")
+    if not address:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Address parameter is required"}
+        )
+    result = geocoder.geocode(address)
+    if not result:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"No location data found for address: {address}"}
+        )
+    latitude = result[0]["geometry"]["lat"]
+    longitude = result[0]["geometry"]["lng"]
+
+
+    # Create a geospatial query to find hotels within 10km
+    query = {
+        "location": {
+            "$nearSphere": {
+                "$geometry": {
+                    "type": "Point",
+                    "coordinates": [longitude, latitude]
+                },
+                "$maxDistance": 30000  # 10km in meters
+            }
+        }
+    }
+
+    # Fetch hotel data from MongoDB using geospatial query
+    hotel_data = list(hotel_collection.find(query))
+
+    if not hotel_data:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No hotels found within 10km of the specified location"}
+        )
+
+    # Convert ObjectId to string
+    for hotel in hotel_data:
+        hotel["_id"] = str(hotel["_id"])
+
+    return JSONResponse(content=hotel_data)
+
+def get_airbnb_data_for_location(request: Request):
+    geocoder = OpenCageGeocode(api_key)
+    data = request.query_params
+    address = data.get("address")
+    if not address:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Address parameter is required"}
+        )
+    result = geocoder.geocode(address)
+    if not result:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"No location data found for address: {address}"}
+        )
+    latitude = result[0]["geometry"]["lat"]
+    longitude = result[0]["geometry"]["lng"]
+
+
+    # Create a geospatial query to find hotels within 10km
+    query = {
+        "location": {
+            "$nearSphere": {
+                "$geometry": {
+                    "type": "Point",
+                    "coordinates": [longitude, latitude]
+                },
+                "$maxDistance": 30000  # 10km in meters
+            }
+        }
+    }
+
+    # Fetch hotel data from MongoDB using geospatial query
+    hotel_data = list(airbnb_collection.find(query))
+
+    if not hotel_data:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No airbnbs found within 30km of the specified location"}
+        )
+
+    # Convert ObjectId to string
+    for hotel in hotel_data:
+        hotel["_id"] = str(hotel["_id"])
+
+    return JSONResponse(content=hotel_data)

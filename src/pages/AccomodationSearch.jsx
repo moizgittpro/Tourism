@@ -12,44 +12,49 @@ const AccommodationSearch = () => {
   const [accommodationType, setAccommodationType] = useState("hotels"); // 'hotels' or 'airbnbs'
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
+  const [is404, setIs404] = useState(false);
 
   const fetchAccommodations = async () => {
     if (!city.trim()) {
       setError("Please enter a city name");
       return;
     }
+  
     setLoading(true);
     setError(null);
     setSearchPerformed(true);
+  
     try {
-      const endpoint =
+      const baseUrl =
         accommodationType === "hotels"
-          ? "http://localhost:8000/get-hotels"
+          ? "http://localhost:8000/get-hotels" 
           : "http://localhost:8000/get-airbnbs";
-      const response = await fetch(endpoint, {
-        method: "POST",
+  
+      // Construct query params
+      const queryParams = new URLSearchParams({ address: city.trim() });
+  
+  
+      const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          city: city.trim(),
-          priceRange,
-        }),
       });
+  
       if (!response.ok) {
+        if (response.status === 404) {
+          setIs404(true);
+          throw new Error(`No accommodations found in ${city}`);
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+  
       const data = await response.json();
+  
       if (Array.isArray(data)) {
-        // Sort data by price
-        const sortedData = [...data].sort((a, b) => {
-          if (sortOrder === "asc") {
-            return a.price - b.price;
-          } else {
-            return b.price - a.price;
-          }
-        });
+        const sortedData = [...data].sort((a, b) =>
+          sortOrder === "asc" ? a.price - b.price : b.price - a.price
+        );
         setAccommodations(sortedData);
         setActiveAccommodation(null);
       } else {
@@ -57,13 +62,14 @@ const AccommodationSearch = () => {
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(`Failed to fetch data: ${err.message}`);
+      setError(`${err.message}`);
       setAccommodations([]);
     } finally {
       setLoading(false);
     }
   };
-  useEffect(() => {
+  
+  useEffect(() => { 
     if (searchPerformed && city) {
       fetchAccommodations();
     }
@@ -72,12 +78,31 @@ const AccommodationSearch = () => {
     e.preventDefault();
     fetchAccommodations();
   };
-  const getStarRating = (rating) => {
-    if (!rating)
-      return <span className={styles["noRating"]}>No ratings yet</span>;
+
+  const generateLink = () => {
+    const page_id = activeAccommodation.page_id;
+    if (!page_id) {
+      console.error("Page ID is not available");
+      return;
+    }
+
+    let baseUrl = "https://www.booking.com/hotel/pk/";
+    if (accommodationType === "airbnbs") {
+      baseUrl = "https://www.airbnb.com/rooms/";
+    }
+
+    // Convert page_id to string to ensure proper concatenation
+    const pageIdString = String(page_id);
+    console.log("Opening link:", baseUrl + pageIdString);
+    return window.open(baseUrl + pageIdString, "_blank");
+  }
+  const getStarRating = (review_score, review_count) => {
+    if (review_count === "No reviews yet") return <span className={styles["noRating"]}>No ratings yet</span>;
     const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
+    if (accommodationType === "hotels") review_score = review_score /2;
+
+    const fullStars = Math.floor(review_score);
+    const hasHalfStar = review_score % 1 >= 0.5;
     for (let i = 0; i < 5; i++) {
       if (i < fullStars) {
         stars.push(
@@ -101,24 +126,31 @@ const AccommodationSearch = () => {
     }
     return (
       <div className={styles["star-rating"]}>
-        {stars} <span className={styles["rating-number"]}>({rating})</span>
+        {stars} <span className={styles["rating-number"]}>({review_score})</span>
       </div>
     );
   };
-  const formatPrice = (price) => {
+  const formatPrice = (price, currencyForm) => {
+    const currency = currencyForm === "PKR" ? "PKR" : "USD";
+    const numericPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.-]/g, '')) : Number(price);
+    
+    if (isNaN(numericPrice)) {
+      return currency === "PKR" ? "PKR 0" : "$0";
+    }
+    
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(numericPrice);
   };
   const showAccommodationDetails = (accommodation) => {
     setActiveAccommodation(accommodation);
-    document.body.classList.add("modal-open");
+    document.body.classList.add("modalOpen");
   };
   const closeAccommodationDetails = () => {
     setActiveAccommodation(null);
-    document.body.classList.remove("modal-open");
+    document.body.classList.remove("modalOpen");
   };
   const handlePriceRangeChange = (e, index) => {
     const newValue = parseInt(e.target.value);
@@ -287,14 +319,36 @@ const AccommodationSearch = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              {is404 ? (
+                <>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
+                  <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                  <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </>
+              ) : (
+                <>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </>
+              )}
             </svg>
             <p>{error}</p>
+            {is404 && (
+              <button 
+                className={styles.retryButton}
+                onClick={() => {
+                  setIs404(false);
+                  setError(null);
+                  setCity("");
+                }}
+              >
+                Try Another City
+              </button>
+            )}
           </div>
         )}
-
         {!loading && accommodations.length > 0 && (
           <div className={styles["resultsSection"]}>
             <div className={styles["resultsHeader"]}>
@@ -308,7 +362,7 @@ const AccommodationSearch = () => {
               </p>
             </div>
 
-            <div className={styles["accommodationsgrid"]}>
+            <div className={styles["accommodationsGrid"]}>
               {accommodations.map((accommodation) => (
                 <div
                   key={accommodation.id}
@@ -316,9 +370,9 @@ const AccommodationSearch = () => {
                   onClick={() => showAccommodationDetails(accommodation)}
                 >
                   <div className={styles["accommodationImage"]}>
-                    {accommodation.photo_url ? (
+                    {accommodation.image_links ? (
                       <img
-                        src={accommodation.photo_url}
+                        src={accommodation.image_links[0]}
                         alt={accommodation.name}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -342,18 +396,20 @@ const AccommodationSearch = () => {
                       {accommodation.name}
                     </h3>
                     <p className={styles["accommodationAddress"]}>
-                      {accommodation.address}
+                      {typeof accommodation.address === 'object' 
+                        ? `${accommodation.address.street}, ${accommodation.address.city}`
+                        : accommodation.address}
                     </p>
                     <div className={styles["accommodationStats"]}>
                       <div className={styles["ratingContainer"]}>
-                        {getStarRating(accommodation.rating)}
+                        {getStarRating(accommodation.review_score, accommodation.review_count)}
                         <span className={styles["reviewsCount"]}>
                           ({accommodation.review_count || 0})
                         </span>
                       </div>
                       <div className={styles["priceContainer"]}>
                         <span className={styles["price"]}>
-                          {formatPrice(accommodation.price)}
+                          {accommodationType === "hotels" ? formatPrice(accommodation.price,"PKR") : formatPrice(accommodation.price,"USD")}
                         </span>
                         <span className={styles["pricePeriod"]}>/night</span>
                       </div>
@@ -481,9 +537,9 @@ const AccommodationSearch = () => {
             </button>
 
             <div className={styles["modalImage"]}>
-              {activeAccommodation.photo_url ? (
+              {activeAccommodation.image_links ? (
                 <img
-                  src={activeAccommodation.photo_url}
+                  src={activeAccommodation.image_links[0]}
                   alt={activeAccommodation.name}
                   onError={(e) => {
                     e.target.onerror = null;
@@ -502,15 +558,15 @@ const AccommodationSearch = () => {
 
               <div className={styles["modalStats"]}>
                 <div className={styles["modalRating"]}>
-                  {getStarRating(activeAccommodation.rating)}
+                  {getStarRating(activeAccommodation.review_score, activeAccommodation.review_count)}
                   <span className={styles["modalReviews"]}>
-                    ({activeAccommodation.review_count || 0} reviews)
+                    ({activeAccommodation.review_count || 0})
                   </span>
                 </div>
 
                 <div className={styles["modalPrice"]}>
                   <span className={styles["priceAmount"]}>
-                    {formatPrice(activeAccommodation.price)}
+                    {accommodationType === "hotels" ? formatPrice(activeAccommodation.price,"PKR") : formatPrice(activeAccommodation.price,"USD")}
                   </span>
                   <span className={styles["pricePeriod"]}>/night</span>
                 </div>
@@ -535,7 +591,9 @@ const AccommodationSearch = () => {
                   <div className={styles["infoText"]}>
                     <span className={styles["infoLabel"]}>Address</span>
                     <span className={styles["infoValue"]}>
-                      {activeAccommodation.address}
+                      {typeof activeAccommodation.address === 'object'
+                        ? `${activeAccommodation.address.street}`
+                        : activeAccommodation.address}
                     </span>
                   </div>
                 </div>
@@ -626,7 +684,7 @@ const AccommodationSearch = () => {
               )}
 
               <div className={styles["modalActions"]}>
-                <button className={styles["bookButton"]}>Book Now</button>
+                <button className={styles["bookButton"]} onClick={generateLink}>Book Now</button>
 
                 <button className={styles["saveButton"]}>
                   <svg
