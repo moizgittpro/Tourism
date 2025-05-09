@@ -39,3 +39,5 @@ Now that you have all the information, provide a comprehensive travel plan that 
 
 Be creative, informative, and tailor your response to match the user's preferences.
 """
+
+chat_system_message = "YOU ARE A TOURIST GUIDE AND HAVE ALL INFORMATION ABOUT THE LOCATION, GIVE ANSWERS TO USERS QUERIES"
