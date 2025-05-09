@@ -192,6 +192,7 @@ function Chat() {
       }
       
       // Handle summary data if present
+      // Handle summary data if present
       if (data.trip_summary) {
         setTripSummary(data.trip_summary);
         setFlights(data.flights || []);
@@ -199,12 +200,15 @@ function Chat() {
         setAttractions(data.tourist_attractions || []);
         setShowSummary(true);
       }
-      
-      // Add bot response after a short delay to simulate typing
+
+      // Only add bot message if it's not the summary (avoid duplicate)
       setTimeout(() => {
         setIsTyping(false);
-        handleBotResponse(data.message);
-      }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+        // If this is a summary response, don't add it as a chat bubble
+        if (!data.trip_summary) {
+          handleBotResponse(data.message);
+        }
+      }, 1000 + Math.random() * 1000);
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -267,15 +271,15 @@ function Chat() {
         
         <form className="chat-input" onSubmit={handleSubmit}>
           <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={`Enter your ${currentStep}...`}
-            disabled={showSummary}
+        type="text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder={showSummary ? "Ask anything about your trip..." : `Enter your ${currentStep}...`}
+        disabled={false}
           />
-          <button type="submit" disabled={!inputText.trim() || showSummary}>
-            <i className="fas fa-paper-plane"></i>
-          </button>
+      <button type="submit" disabled={!inputText.trim()}>
+        <i className="fas fa-paper-plane"></i>
+      </button>
         </form>
       </div>
       
