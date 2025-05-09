@@ -4,3 +4,7 @@ A Full Stack Tourism Guidence App
 
 # To run backend scripts
 Run pip install -r requirements.txt in main project dir
+
+# BEFORE RUN SETUP REDIS
+brew install redis
+brew start services redis
