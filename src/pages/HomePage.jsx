@@ -8,7 +8,6 @@ const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -159,22 +158,14 @@ const HomePage = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/destinations" className="nav-link">Destinations</Link>
-            <Link to="/experiences" className="nav-link">Experiences</Link>
-            <Link to="/culture" className="nav-link">Culture</Link>
-            <Link to="/plan" className="nav-link">Plan Your Trip</Link>
-            <Link to="/about" className="nav-link">About Pakistan</Link>
+            <Link to="/chat" className="nav-link">Plan My Trip</Link>
+            <Link to="/flights" className="nav-link">Flights</Link>
+            <Link to="/accommodation-search" className="nav-link">Accomodations</Link>
+            <Link to="/nearby-search" className="nav-link">Explore Pakistan</Link>
+            <Link to="/restaurants" className="nav-link">Restaurants</Link>
           </nav>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <button className="px-4 py-2 rounded-full bg-transparent text-blue-600 border border-blue-600 hover:bg-blue-50 transition duration-300">
-              Sign In
-            </button>
-            <button className="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition duration-300">
-              Sign Up
-            </button>
-          </div>
-
+          
           {/* Mobile Menu Button */}
           <button 
             className="md:hidden text-blue-600 focus:outline-none"
@@ -187,19 +178,13 @@ const HomePage = () => {
         {/* Mobile Navigation */}
         <div className={`md:hidden bg-white shadow-lg overflow-hidden transition-all duration-300 ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="container mx-auto px-4 py-4 space-y-4">
-            <Link to="/destinations" className="block py-2 hover:text-blue-600 transition">Destinations</Link>
             <Link to="/experiences" className="block py-2 hover:text-blue-600 transition">Experiences</Link>
             <Link to="/culture" className="block py-2 hover:text-blue-600 transition">Culture</Link>
             <Link to="/plan" className="block py-2 hover:text-blue-600 transition">Plan Your Trip</Link>
             <Link to="/about" className="block py-2 hover:text-blue-600 transition">About Pakistan</Link>
             
             <div className="pt-4 flex flex-col space-y-3">
-              <button className="py-2 rounded-full bg-transparent text-blue-600 border border-blue-600 hover:bg-blue-50 transition">
-                Sign In
-              </button>
-              <button className="py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition">
-                Sign Up
-              </button>
+             
             </div>
           </div>
         </div>
@@ -241,24 +226,12 @@ const HomePage = () => {
       From snow-capped mountains to ancient civilizations, embark on an unforgettable journey
     </p>
 
-    <div className="search-container bg-white rounded-full p-2 md:p-3 shadow-xl max-w-4xl mx-auto flex flex-col md:flex-row items-center animate-fade-in-up delay-300">
-      <div className="flex items-center flex-1 px-4 py-2">
-        <MapPin className="text-blue-600 mr-2" size={20} />
-        <input
-          type="text"
-          placeholder="Where do you want to go?"
-          className="w-full bg-transparent focus:outline-none text-gray-800"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      <div className="w-full md:w-auto mt-2 md:mt-0">
-        <button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full flex items-center justify-center transition duration-300 search-button">
-          <Search size={20} className="mr-2" />
-          Explore Now
-        </button>
-      </div>
-    </div>
+   
+     
+        
+        
+
+      
 
     <div className="mt-12 flex flex-wrap justify-center gap-4 md:gap-8 animate-fade-in-up delay-500">
       <Link to="/Chat" className="feature-card hover:scale-105 transition-transform duration-300">
@@ -311,7 +284,7 @@ const HomePage = () => {
               <h2 className="text-3xl md:text-4xl font-bold mb-3">Popular Destinations</h2>
               <p className="text-gray-600 max-w-2xl">Discover the most breathtaking and awe-inspiring places Pakistan has to offer</p>
             </div>
-            <Link to="/destinations" className="flex items-center text-blue-600 mt-4 md:mt-0 hover:text-blue-800 transition group">
+            <Link to="/nearby-search" className="flex items-center text-blue-600 mt-4 md:mt-0 hover:text-blue-800 transition group">
               View all destinations
               <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -337,13 +310,7 @@ const HomePage = () => {
                 <div className="p-5">
                   <h3 className="text-xl font-semibold mb-2">{destination.name}</h3>
                   <p className="text-gray-600 text-sm mb-4">{destination.description}</p>
-                  <Link 
-                    to={`/destination/${destination.id}`} 
-                    className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
-                  >
-                    Explore more
-                    <ArrowRight size={16} className="ml-2" />
-                  </Link>
+                 
                 </div>
               </div>
             ))}
@@ -395,7 +362,7 @@ const HomePage = () => {
                       ))}
                     </ul>
                     <Link 
-                      to={`/category/${category.name.toLowerCase()}`}
+                      to={`/nearby-search`}
                       className="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
                     >
                       View all {category.name}
@@ -429,10 +396,7 @@ const HomePage = () => {
                 <p className="opacity-90 mb-5">
                   Pakistan is home to five of the world's fourteen 8000+ meter peaks, including K2, the second highest mountain in the world.
                 </p>
-                <Link to="/experiences/trekking" className="text-white hover:text-blue-200 font-medium flex items-center text-sm mt-auto">
-                  Discover treks
-                  <ArrowRight size={16} className="ml-2" />
-                </Link>
+                
               </div>
             </div>
             
@@ -445,10 +409,7 @@ const HomePage = () => {
                 <p className="opacity-90 mb-5">
                   Experience the rich flavors of authentic Pakistani cuisine from street food to royal dishes that reflect centuries of culinary art.
                 </p>
-                <Link to="/experiences/food" className="text-white hover:text-blue-200 font-medium flex items-center text-sm mt-auto">
-                  Food adventures
-                  <ArrowRight size={16} className="ml-2" />
-                </Link>
+               
               </div>
             </div>
             
@@ -461,10 +422,7 @@ const HomePage = () => {
                 <p className="opacity-90 mb-5">
                   Join the vibrant celebrations of Pakistan's diverse cultural festivals throughout the year, from Basant to the Shandur Polo Festival.
                 </p>
-                <Link to="/experiences/festivals" className="text-white hover:text-blue-200 font-medium flex items-center text-sm mt-auto">
-                  Explore festivals
-                  <ArrowRight size={16} className="ml-2" />
-                </Link>
+               
               </div>
             </div>
           </div>
@@ -503,7 +461,7 @@ const HomePage = () => {
                   </div>
                   <p className="text-blue-600 font-medium mb-4">{event.date}</p>
                   <Link 
-                    to={`/event/${event.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                    to={`/chat`} 
                     className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
                   >
                     Learn more
@@ -566,8 +524,8 @@ const HomePage = () => {
             <Link to="/chat" className="px-8 py-3 bg-white text-blue-600 rounded-full font-medium hover:bg-opacity-90 transition duration-300 shadow-lg">
               Plan My Journey
             </Link>
-            <Link to="/destinations" className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white hover:bg-opacity-10 transition duration-300">
-              Browse Destinations
+            <Link to="/nearby-search" className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white hover:bg-opacity-10 transition duration-300">
+              Browse Tourist Attractions
             </Link>
           </div>
         </div>
