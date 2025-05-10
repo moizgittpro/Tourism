@@ -111,7 +111,7 @@ def get_destination(destination):
 
     validate_prompt = "Is {destination} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
     is_valid,message =  validate(validate_prompt,destination)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : destination_template.format(destination=destination)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -130,7 +130,7 @@ def get_origin(origin):
     )
     validate_prompt = "Is {origin} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,origin)  
-    if is_valid:
+    if True:
          return {"status" : "success", "message":message,"template" : origin_template.format(origin = origin)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -148,7 +148,7 @@ def get_days_of_travel(days_of_travel):
 
     validate_prompt = "Is {days_of_travel} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,days_of_travel)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : days_of_travel_template.format(days_of_travel= days_of_travel)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -167,7 +167,7 @@ def get_mood(mood):
 
     validate_prompt = "Is {mood} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,mood)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : mood_template.format(mood=mood)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -185,7 +185,7 @@ def get_route(route):
 
     validate_prompt = "Is {route} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,route)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : route_template.format(route=route)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -465,6 +465,7 @@ async def chat(request : Request):
             states["route"] = user_input
             summary_response = generate_summary()
             if summary_response["status"] == "success":
+                print("AFTER SUMMARY")
                 user_state["current_step"] = "chat"
                 return JSONResponse(content={
                     "message": summary_response["trip_summary"],
