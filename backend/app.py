@@ -6,9 +6,18 @@ from routes.restaurant_api import place_photo,random_photo,restaurant
 from routes.nearby_search import get_data
 from routes.hotel_search import get_hotel_data_for_location,get_airbnb_data_for_location
 from chatbot.chatbot_chaining import chat,reset_conversation
+from routes.connection import ensure_indexes
+from contextlib import asynccontextmanager
 
-app = FastAPI()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_indexes()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+# Middleware for CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,8 +46,6 @@ app.add_api_route("/reset",endpoint=reset_conversation,methods=["POST"])
 ## HOTELS
 app.add_api_route("/get-hotels",endpoint=get_hotel_data_for_location,methods=["GET"])
 app.add_api_route("/get-airbnbs",endpoint=get_airbnb_data_for_location,methods=["GET"])
-
-
 
 
 if __name__ == "__main__":

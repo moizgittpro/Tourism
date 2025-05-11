@@ -5,6 +5,7 @@ import re
 from pymongo import MongoClient
 import time
 import random
+from datetime import datetime, timedelta
 
 """
 NOTE: This code returns null whenever some data is not found in the HTML page. 
@@ -22,7 +23,7 @@ user_agents = [
 ]
 
 # Read hotel names from JSON file
-with open('backend/scripts/page_names.json', 'r') as file:
+with open('page_names.json', 'r') as file:
     hotel_names = json.load(file)
 
 if not hotel_names:
@@ -30,17 +31,28 @@ if not hotel_names:
 
 hotel_names = hotel_names["pageNames"]
 
+# Get current date
+current_date = datetime.now()
 
+checkin_date = (current_date + timedelta(7)).strftime('%Y-%m-%d')
+checkout_date = (current_date + timedelta(8)).strftime('%Y-%m-%d')
+
+print(f"Check-in date: {checkin_date}")
+print(f"Check-out date: {checkout_date}")
 for hotel_name in hotel_names:
     print(f"Scraping hotel: {hotel_name}")
 
-    url = f"https://www.booking.com/hotel/pk/{hotel_name}.html?&checkin=2025-05-10&checkout=2025-05-11&group_adults=1&group_children=0"
+    url = f"https://www.booking.com/hotel/pk/{hotel_name}.html?&checkin={checkin_date}&checkout={checkout_date}&group_adults=1&group_children=0"
 
     headers = {
         "User-Agent": random.choice(user_agents)
     }
 
     response = requests.get(url, headers=headers).text
+    if "Sorry, we couldn't find that page" in response:
+        continue
+    if "Sorry, we couldn't find any results" in response:
+        continue
     soup = BeautifulSoup(response, "html.parser")
 
     # Hotel title
@@ -71,9 +83,11 @@ for hotel_name in hotel_names:
     features = [li.get_text(strip=True) for li in features_ul.find_all('li')] if features_ul else []
 
     # Price and room type
-    price_block = soup.find('tr', class_=lambda x: x and 'hprt-table-cheapest-block' in x)
-    price = price_block['data-hotel-rounded-price'] if price_block and 'data-hotel-rounded-price' in price_block.attrs else None
-    first_span = price_block.find('span', class_='hprt-roomtype-icon-link') if price_block else None
+    price_span = soup.find('span', class_='prco-valign-middle-helper')
+    price = price_span.get_text(strip=True).replace('PKR', '').replace(',', '').strip() if price_span else None
+    if price==None:
+        continue
+    first_span = soup.find('span', class_='hprt-roomtype-icon-link')
     span_text = first_span.get_text(strip=True) if first_span else None
 
     # Review info
@@ -151,7 +165,7 @@ for hotel_name in hotel_names:
     # === MongoDB Integration ===
     client = MongoClient("mongodb://localhost:27017/")
     db = client["tourism"]
-    collection = db["hotels"]
+    collection = db["hotel"]
 
     # Create compound index for optimized search
     if "location.city_1_cheapest_price_1" not in collection.index_information():
@@ -161,4 +175,4 @@ for hotel_name in hotel_names:
     collection.insert_one(data)
     print("Data inserted into MongoDB successfully.")
     
-    time.sleep(random.uniform(1, 3)) # Optional: Sleep for 2 seconds to avoid overwhelming the server
+    time.sleep(random.uniform(1, 3)) # Optional: Sleep for 1-3 seconds to avoid overwhelming the server

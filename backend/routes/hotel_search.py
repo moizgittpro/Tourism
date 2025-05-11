@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from opencage.geocoder import OpenCageGeocode
@@ -10,6 +9,7 @@ api_key = os.getenv("opencage_api_key")
 
 airbnb_collection = mongo_db["air_bnb"]
 hotel_collection = mongo_db["hotel"]
+
 
 def get_hotel_data_for_city(request: Request):
     data = request.query_params
@@ -63,6 +63,8 @@ def get_hotel_data_for_location(request: Request):
     geocoder = OpenCageGeocode(api_key)
     data = request.query_params
     address = data.get("address")
+    price_min = data.get("price_min")
+    price_max = data.get("price_max")
     if not address:
         return JSONResponse(
             status_code=400,
@@ -78,7 +80,7 @@ def get_hotel_data_for_location(request: Request):
     longitude = result[0]["geometry"]["lng"]
 
 
-    # Create a geospatial query to find hotels within 10km
+    # Create a geospatial query to find hotels within 10km with price range
     query = {
         "location": {
             "$nearSphere": {
@@ -90,6 +92,16 @@ def get_hotel_data_for_location(request: Request):
             }
         }
     }
+
+    # Add price range conditions if provided
+    if price_min or price_max:
+        price_conditions = {}
+        if price_min:
+            price_conditions["$gte"] = float(price_min)
+        if price_max:
+            price_conditions["$lte"] = float(price_max)
+        if price_conditions:
+            query["price"] = price_conditions
 
     # Fetch hotel data from MongoDB using geospatial query
     hotel_data = list(hotel_collection.find(query))
@@ -110,6 +122,8 @@ def get_airbnb_data_for_location(request: Request):
     geocoder = OpenCageGeocode(api_key)
     data = request.query_params
     address = data.get("address")
+    price_min = data.get("price_min")
+    price_max = data.get("price_max")
     if not address:
         return JSONResponse(
             status_code=400,
@@ -137,6 +151,16 @@ def get_airbnb_data_for_location(request: Request):
             }
         }
     }
+
+    # Add price range conditions if provided
+    if price_min or price_max:
+        price_conditions = {}
+        if price_min and int(price_min) > int("0"):
+            price_conditions["$gte"] = float(price_min)
+        if price_max and int(price_min) > int("0"):
+            price_conditions["$lte"] = float(price_max)
+        if price_conditions:
+            query["price"] = price_conditions
 
     # Fetch hotel data from MongoDB using geospatial query
     hotel_data = list(airbnb_collection.find(query))
