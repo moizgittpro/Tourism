@@ -10,7 +10,7 @@ const AccommodationSearch = () => {
   const [activeAccommodation, setActiveAccommodation] = useState(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [accommodationType, setAccommodationType] = useState("hotels"); // 'hotels' or 'airbnbs'
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 600000]);
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
   const [is404, setIs404] = useState(false);
 
@@ -31,7 +31,7 @@ const AccommodationSearch = () => {
           : "http://localhost:8000/get-airbnbs";
   
       // Construct query params
-      const queryParams = new URLSearchParams({ address: city.trim() });
+      const queryParams = new URLSearchParams({ address: city.trim(), price_min: priceRange[0], price_max: priceRange[1] });
   
   
       const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
@@ -130,8 +130,8 @@ const AccommodationSearch = () => {
       </div>
     );
   };
-  const formatPrice = (price, currencyForm) => {
-    const currency = currencyForm === "PKR" ? "PKR" : "USD";
+  const formatPrice = (price) => {
+    const currency = accommodationType === "hotels" ? "PKR" : "USD";
     const numericPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.-]/g, '')) : Number(price);
     
     if (isNaN(numericPrice)) {
@@ -158,6 +158,11 @@ const AccommodationSearch = () => {
     newRange[index] = newValue;
 
     // Ensure min doesn't exceed max
+    if (accommodationType === "hotels" && newValue > 600000) {
+      newRange[index] = 600000;
+    } else if (accommodationType === "airbnbs" && newValue > 2000) {
+      newRange[index] = 2000;
+    }
     if (index === 0 && newValue > newRange[1]) {
       newRange[0] = newRange[1];
     }
@@ -215,7 +220,11 @@ const AccommodationSearch = () => {
         <div className={styles["accommodationTypeToggle"]}>
           <button
             className={`${styles.toggleButton} ${accommodationType === "hotels" ? styles.active : ""}`}
-            onClick={() => setAccommodationType("hotels")}
+            onClick={() => {setAccommodationType("hotels")
+                            setPriceRange([0, 600000])
+                            setSortOrder("asc") // Reset sort order to ascending when switching to Airbnbs
+                            setCity("")
+                            setAccommodations([])}}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +244,12 @@ const AccommodationSearch = () => {
           </button>
           <button
             className={`${styles.toggleButton} ${accommodationType === "airbnbs" ? styles.active : ""}`}
-            onClick={() => setAccommodationType("airbnbs")}
+            onClick={() => {setAccommodationType("airbnbs")
+                            setPriceRange([0, 2000])
+                            setSortOrder("asc") // Reset sort order to ascending when switching to Airbnbs
+                            setCity("")
+                            setAccommodations([])}
+                          }
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -252,32 +266,41 @@ const AccommodationSearch = () => {
             Airbnbs
           </button>
         </div>
+        </div>
 
         <div className={styles["priceFilter"]}>
           <div className={styles["priceRange"]}>
-            <span>
-              Price Range: {formatPrice(priceRange[0])} -{" "}
-              {formatPrice(priceRange[1])}
-            </span>
-            <div className={styles["rangeInputs"]}>
-              <input
-                type="range"
-                min="0"
-                max="2000"
-                step="50"
-                value={priceRange[0]}
-                onChange={(e) => handlePriceRangeChange(e, 0)}
-                className={styles["rangeSlider"]}
-              />
-              <input
-                type="range"
-                min="0"
-                max="2000"
-                step="50"
-                value={priceRange[1]}
-                onChange={(e) => handlePriceRangeChange(e, 1)}
-                className={styles["rangeSlider"]}
-              />
+            <span>Price Range</span>
+            <div className={styles["priceInputs"]}>
+              <div className={styles["inputGroup"]}>
+                <span className={styles["currencySymbol"]}>
+                  {accommodationType === "hotels" ? "PKR" : "$"}
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  max={accommodationType === "hotels" ? "600000" : "2000"}
+                  value={priceRange[0]}
+                  onChange={(e) => handlePriceRangeChange(e, 0)}
+                  className={styles["priceInput"]}
+                  placeholder="Min"
+                />
+              </div>
+              <span className={styles["priceSeparator"]}>-</span>
+              <div className={styles["inputGroup"]}>
+                <span className={styles["currencySymbol"]}>
+                  {accommodationType === "hotels" ? "PKR" : "$"}
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  max={accommodationType === "hotels" ? "600000" : "2000"}
+                  value={priceRange[1]}
+                  onChange={(e) => handlePriceRangeChange(e, 1)}
+                  className={styles["priceInput"]}
+                  placeholder="Max"
+                />
+              </div>
             </div>
           </div>
 
@@ -294,7 +317,6 @@ const AccommodationSearch = () => {
             </select>
           </div>
         </div>
-      </div>
 
       <main className={styles["mainContent"]}>
         {loading && (

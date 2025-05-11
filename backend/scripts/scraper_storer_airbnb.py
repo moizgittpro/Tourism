@@ -179,7 +179,10 @@ for key in bbox:
         transformed_data = {
             # exclude unwanted fields
             "page_id": str(search_result['room_id']),  # rename room_id and convert to string
-            "price": f"${search_result['price']['unit']['amount']}",  # simplified price with dollar symbol
+            "name": search_result['title'],
+            "badges": search_result['badges'],
+            "category": search_result['category'],
+            "price": {search_result['price']['unit']['amount']},  # simplified price with dollar symbol
             "review_score": search_result['rating']['value'],
             "review_count": search_result['rating']['reviewCount'],
             "reviews_status": "No reviews yet" if search_result['rating']['reviewCount'] == 0 else "Reviews available",

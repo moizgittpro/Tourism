@@ -55,7 +55,94 @@ const FlightSearchApp = () => {
     }
   };
 
-  // Function to format currency
+  const formatDepartureDate = (dateString) => {
+  // Expected format: "Sat, May 24"
+  const parts = dateString.split(',');
+  if (parts.length < 2) return dateString;
+
+  const [_, monthDay] = parts;
+  const [month, day] = monthDay.trim().split(' ');
+
+  const year = new Date().getFullYear(); // Or dynamically use new Date().getFullYear()
+  const date = new Date(`${month} ${day}, ${year}`);
+
+  if (isNaN(date)) return dateString;
+
+  const dayNum = date.getDate();
+  const monthShort = date.toLocaleString('default', { month: 'short' });
+
+  return `${dayNum} ${monthShort} ${date.getFullYear()}`;
+};
+
+
+  const handleGenerateFlightURL = (departureDate, airline) => {
+
+    departureDate = formatDepartureDate(departureDate);
+    console.log(departureDate);
+    if (airline === 'Pakistan International Airlines') {
+      const params = {
+        tripType: 'ONE_WAY',
+        depPort: fromAirport,
+        arrPort: toAirport,
+        departureDate: departureDate,
+        returnDate: '',
+        'passengerQuantities[0][passengerType]': 'ADLT',
+        'passengerQuantities[0][passengerSubType]': '',
+        'passengerQuantities[0][quantity]': '1',
+        'passengerQuantities[1][passengerType]': 'CHLD',
+        'passengerQuantities[1][passengerSubType]': '',
+        'passengerQuantities[1][quantity]': '0',
+        'passengerQuantities[2][passengerType]': 'INFT',
+        'passengerQuantities[2][passengerSubType]': '',
+        'passengerQuantities[2][quantity]': '0',
+        currency: 'PKR',
+        cabinClass: '',
+        lang: 'EN',
+        nationality: '',
+        promoCode: '',
+        accountCode: '',
+        affiliateCode: '',
+        clickId: '',
+        withCalendar: 'false',
+        isMobileCalendar: '',
+        market: '',
+        isFFPoint: 'false',
+        umrahPassenger: 'false'
+      };
+
+      const queryString = new URLSearchParams(params).toString();
+      let flightURL = `https://book-pia.crane.aero/ibe/availability?${queryString}`;
+      
+
+      window.open(flightURL, '_blank'); // Open in new tab
+    }
+
+    else if (airline === 'Fly Jinnah') {
+      const dateObj = new Date(date);
+      departureDate = `${dateObj.getDate()}-${dateObj.getMonth() + 1}-${dateObj.getFullYear()}`;
+      const flightURL = `https://reservations.flyjinnah.com/service-app/ibe/reservation.html#/fare/en/PKR/PK/${fromAirport}/${toAirport}/${departureDate}/N/1/0/0/Y//N/N`;
+      window.open(flightURL, '_blank'); // Open in new tab
+    }
+
+    else if (airline === 'Airblue') {
+      const flightURL="https://www.airblue.com/bookings/Vues/flight_selection.aspx?=auto"
+      window.open(flightURL, '_blank'); 
+    }
+
+    else if (airline === 'Serene Air') {
+      const dateObj = new Date(date);
+      const formattedDate = `${dateObj.getFullYear()}${String(dateObj.getMonth() + 1).padStart(2, '0')}${String(dateObj.getDate()).padStart(2, '0')}`;
+      const flightURL = `https://serene.quickprs.com/pc/flight?adult=1&child=0&infant=0&depart=${fromAirport}&arrive=${toAirport}&depart_date=${formattedDate}&return_date=&isCity=0&isIframe=true&currency=PKR&lang=en_US`;
+      window.open(flightURL, '_blank');
+    }
+
+    else if (airline === 'Air Sial') {
+      const flightURL="https://www.airsial.com"
+      window.open(flightURL, '_blank');
+    }
+
+
+  }  // Function to format currency
   const formatPrice = (price) => {
     if (price === 'Price unavailable') return price;
     return price.replace('PKR\xa0', 'PKR ');
@@ -200,7 +287,7 @@ const FlightSearchApp = () => {
                         <DollarSign size={14} />
                         <span>{formatPrice(flight.price)}</span>
                       </div>
-                      <button className={styles.bookBtn}>Book Now</button>
+                      <button className={styles.bookBtn} onClick={() => handleGenerateFlightURL(flight.departure.split(' on ')[1],airline)}>Book Now</button>
                     </div>
                   </div>
                 ))}

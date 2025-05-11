@@ -9,6 +9,22 @@ mongo_client = MongoClient(
     serverSelectionTimeoutMS=5000
 )
 mongo_db = mongo_client['tourism']
+# Create collections with indexes
+airbnb_collection = mongo_db["air_bnb"]
+hotel_collection = mongo_db["hotel"]
+
+
+def ensure_indexes():
+    if "location_2dsphere" not in hotel_collection.index_information():
+        hotel_collection.create_index([("location", "2dsphere")], name="location_2dsphere")
+    if "location_2dsphere" not in airbnb_collection.index_information():
+        airbnb_collection.create_index([("location", "2dsphere")], name="location_2dsphere")
+    if "price_1" not in airbnb_collection.index_information():
+        airbnb_collection.create_index([("price", 1)], name="price_1")
+    if "price_1" not in hotel_collection.index_information():
+        hotel_collection.create_index([("price", 1)], name="price_1")
+
+    
 
 # Redis connection with pooling
 redis_client = redis.Redis(
