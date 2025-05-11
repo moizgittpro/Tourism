@@ -1,13 +1,19 @@
 from pymongo import MongoClient
-import redis
+from upstash_redis import Redis
 
-# MongoDB connection with pooling
-mongo_client = MongoClient(
-    "mongodb://localhost:27017/",
-    maxPoolSize=100,
-    minPoolSize=10,
-    serverSelectionTimeoutMS=5000
-)
+
+from dotenv import load_dotenv
+import os
+
+# Load .env file
+load_dotenv()
+
+# Print MONGO_URL and REDIS_URL to ensure they are being loaded correctly
+MONGO_URL = os.getenv('MONGO_URL')
+REDIS_URL = os.getenv('REDIS_URL')
+REDIS_TOKEN = os.getenv('REDIS_TOKEN')
+# MongoDB connection
+mongo_client = MongoClient(MONGO_URL, maxPoolSize=100, minPoolSize=10, serverSelectionTimeoutMS=5000)
 mongo_db = mongo_client['tourism']
 # Create collections with indexes
 airbnb_collection = mongo_db["air_bnb"]
@@ -27,12 +33,9 @@ def ensure_indexes():
     
 
 # Redis connection with pooling
-redis_client = redis.Redis(
-    host='localhost',
-    port=6379,
-    db=0,
-    decode_responses=True,  # To get string responses
-    socket_connect_timeout=5,
-    socket_timeout=5,
-    max_connections=50
-)
+if not REDIS_URL:
+    raise ValueError("REDIS_URL is not set in your environment variables")
+
+redis_client =Redis(url=REDIS_URL, token=REDIS_TOKEN)
+
+
