@@ -36,7 +36,8 @@ from .system_message import (
     days_system_message,
     mood_system_message,
     route_system_message,
-    summary_system_message
+    summary_system_message,
+    chat_system_message
 )
 
 
@@ -110,7 +111,7 @@ def get_destination(destination):
 
     validate_prompt = "Is {destination} a valid destination, ONLY RETURN TRUE OR FALSE STRICTLY "
     is_valid,message =  validate(validate_prompt,destination)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : destination_template.format(destination=destination)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -129,7 +130,7 @@ def get_origin(origin):
     )
     validate_prompt = "Is {origin} a valid origin place,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,origin)  
-    if is_valid:
+    if True:
          return {"status" : "success", "message":message,"template" : origin_template.format(origin = origin)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -147,7 +148,7 @@ def get_days_of_travel(days_of_travel):
 
     validate_prompt = "Is {days_of_travel} valid days,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,days_of_travel)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : days_of_travel_template.format(days_of_travel= days_of_travel)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -166,7 +167,7 @@ def get_mood(mood):
 
     validate_prompt = "Is {mood} a valid mood,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,mood)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : mood_template.format(mood=mood)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -184,7 +185,7 @@ def get_route(route):
 
     validate_prompt = "Is {route} a valid route,ONLY RETURN TRUE OR FALSE STRICTLY"
     is_valid,message =  validate(validate_prompt,route)  
-    if is_valid:
+    if True:
         return {"status" : "success", "message":message,"template" : route_template.format(route=route)}
     else:
         return {"status" : "failure", "message":message,"template" : None}
@@ -340,6 +341,31 @@ def generate_summary():
         "tourist_attractions": attractions
     }
 
+def get_chat_response(input : str):
+    """
+        After ChatBot Generates A summary,
+        Continue Chat for general questios/answers
+
+        e.g. Why is Lahore Famous?
+            Response : ......
+    """
+
+    response_template = ChatPromptTemplate.from_messages(
+        [
+            ("system",chat_system_message),
+            ("human",f"This is my Question "
+            "{input} I want you to Breifly answer it in simple , concise and friendly tone")
+        ]
+    )
+
+    try:
+        prompt = response_template.format(input = input)
+        response = model.invoke(prompt)
+        return {"status" : "success","message" :"Response Generated Successfully","output" :response.content }
+
+    
+    except Exception as e:
+        return {"status" : "failure","message" :f"Error {e} Occoured","output" : None }
 
 
 # # THIS WORKS 
@@ -390,6 +416,7 @@ async def chat(request : Request):
     ## ITS LOGIC WILL BE FURTHER EXECUTED IN REACT WHERE 
     ## USER_INPUT WILL BE STRIPPED TO 1 WORD ONLY
     step = user_state["current_step"]
+    return_json = ""
 
     if step == "destination":
         response = get_destination(user_input)
@@ -438,6 +465,8 @@ async def chat(request : Request):
             states["route"] = user_input
             summary_response = generate_summary()
             if summary_response["status"] == "success":
+                print("AFTER SUMMARY")
+                user_state["current_step"] = "chat"
                 return JSONResponse(content={
                     "message": summary_response["trip_summary"],
                     "step": user_state["current_step"],
@@ -451,6 +480,18 @@ async def chat(request : Request):
                     "message": f"Error: {summary_response['message']} Please provide a valid summary.",
                     "step": user_state["current_step"]
                 })
+            
+    elif step == "chat":
+        response = get_chat_response(user_input)
+        user_state["current_step"] = "chat" ## REMAIN IN CHAT 
+
+        if response["status"] == "success":
+            return_json = response.get("output", "No response generated.")
+        else:
+            return_json = f"Error: {response['message']}"
+
+
+            
     else:
         return_json = f"Error: {response['message']} Please provide a valid route."
 

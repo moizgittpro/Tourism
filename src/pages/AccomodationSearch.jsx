@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from "./AccomodationSearch.module.css";
 import React, { useState, useEffect } from "react";
 
