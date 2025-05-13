@@ -3,6 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, MapPin, Plane, Utensils, Search, Hotel, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import './HomePage.css';
+import hunzaImage from '../images/hunza.jpg';
+import historicalImage from '../images/mohenjo-daro.jpg';
+import lahoreFortImage from '../images/lahore_fort.jpg';
+import swatImage from '../images/swat.jpg';
+import makliImage from '../images/makri.jpg';
+import beachesImage from '../images/beaches.jpg';
+import cultureImage from '../images/culture.jpg';
+import poloFestImage from '../images/polo_fest.jpg';
+import basantImage from '../images/basant.jpg';
+import silkRouteImage from '../images/silk_route_festival.jpg';
+
 
 const HomePage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,28 +58,28 @@ const HomePage = () => {
     {
       id: 1,
       name: 'Hunza Valley',
-      image: 'https://images.unsplash.com/photo-1586522902072-5f35806258ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: hunzaImage,
       description: 'Experience breathtaking mountain landscapes and rich local culture',
       rating: 4.9
     },
     {
       id: 2,
       name: 'Lahore Fort',
-      image: 'https://images.unsplash.com/photo-1567000833363-e1e4e737221b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: lahoreFortImage,
       description: 'Explore the historical Mughal architecture and vibrant city life',
       rating: 4.7
     },
     {
       id: 3,
       name: 'Swat Valley',
-      image: 'https://images.unsplash.com/photo-1611822933265-53bef4ded263?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: swatImage,
       description: 'Discover the "Switzerland of Pakistan" with lush green hills',
       rating: 4.8
     },
     {
       id: 4,
       name: 'Makli Necropolis',
-      image: 'https://images.unsplash.com/photo-1618060932014-4deda4932554?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: makliImage,
       description: 'One of the world\'s largest necropolises with historical tombs',
       rating: 4.5
     }
@@ -101,22 +112,22 @@ const HomePage = () => {
   const categories = [
     { 
       name: 'Mountains',
-      image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: hunzaImage,
       places: ['K2 Base Camp', 'Fairy Meadows', 'Nanga Parbat', 'Deosai Plains']
     },
     { 
       name: 'Beaches',
-      image: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      places: ['Kund Malir', 'Hawke\'s Bay', 'Clifton Beach', 'Gwadar']
+      image: beachesImage,
+      places: ['Kund Malir', 'Clifton Beach', 'Gwadar']
     },
     { 
       name: 'Historical',
-      image: 'https://images.unsplash.com/photo-1567000833356-2a10fcad1656?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: historicalImage,
       places: ['Badshahi Mosque', 'Mohenjo-daro', 'Taxila', 'Rohtas Fort']
     },
     { 
       name: 'Cultural',
-      image: 'https://images.unsplash.com/photo-1583243552820-9a686d4da3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      image: cultureImage,
       places: ['Kalash Valley', 'Peshawar Bazar', 'Lok Virsa Museum', 'Karachi Food Street']
     }
   ];
@@ -126,19 +137,19 @@ const HomePage = () => {
       name: 'Shandur Polo Festival',
       date: 'July 7-9, 2025',
       location: 'Shandur Pass',
-      image: 'https://images.unsplash.com/photo-1580274455191-1c62238fa333?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      image: poloFestImage
     },
     {
       name: 'Basant Kite Festival',
       date: 'February 18, 2026',
       location: 'Lahore',
-      image: 'https://images.unsplash.com/photo-1601979031925-424e53b6caaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      image: basantImage
     },
     {
       name: 'Silk Route Festival',
       date: 'August 20-25, 2025',
       location: 'Gilgit-Baltistan',
-      image: 'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      image: silkRouteImage
     }
   ];
 
@@ -225,13 +236,6 @@ const HomePage = () => {
     <p className="text-lg md:text-2xl mb-10 max-w-2xl mx-auto hero-subtitle text-gray-700 animate-fade-in-up delay-150">
       From snow-capped mountains to ancient civilizations, embark on an unforgettable journey
     </p>
-
-   
-     
-        
-        
-
-      
 
     <div className="mt-12 flex flex-wrap justify-center gap-4 md:gap-8 animate-fade-in-up delay-500">
   <Link to="/chat" className="feature-card hero-action-btn">
