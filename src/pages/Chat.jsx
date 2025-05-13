@@ -1,6 +1,5 @@
-import styles from "./index.module.less";
 import React, { useState, useEffect, useRef } from "react";
-import "./journey_curator.css";
+import styles from "./journey_curator.css";
 const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Message component for chat bubbles
