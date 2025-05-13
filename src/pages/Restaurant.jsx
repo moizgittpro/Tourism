@@ -16,6 +16,8 @@ const Restaurant = () => {
 
   //const API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
+  const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
+
   const handleCityChange = (e) => {
     setCity(e.target.value);
   };
@@ -27,7 +29,7 @@ const Restaurant = () => {
     setIsSearched(true);
     
     try {
-      const response = await fetch('http://localhost:8000/restaurant', {
+      const response = await fetch(REACT_APP_API_URL+'/restaurant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,11 +105,11 @@ const Restaurant = () => {
                   {restaurant.image ? (
                     <>
                     <img
-                      src={`http://localhost:8000/place-photo?photo_reference=${restaurant.image}`}
+                      src={`${REACT_APP_API_URL}/place-photo?photo_reference=${restaurant.image}`}
                       alt={restaurant.name}
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'http://localhost:8000/random-photo';
+                        e.target.src = REACT_APP_API_URL+'/random-photo';
                       }}
                     />
                   </>

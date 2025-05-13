@@ -3,6 +3,7 @@
 import styles from "./AccomodationSearch.module.css";
 import React, { useState, useEffect } from "react";
 
+const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
 
 const AccommodationSearch = () => {
   const [city, setCity] = useState("");
@@ -29,8 +30,8 @@ const AccommodationSearch = () => {
     try {
       const baseUrl =
         accommodationType === "hotels"
-          ? "http://localhost:8000/get-hotels" 
-          : "http://localhost:8000/get-airbnbs";
+          ? REACT_APP_API_URL+"/get-hotels" 
+          : REACT_APP_API_URL+"/get-airbnbs";
   
       // Construct query params
       const queryParams = new URLSearchParams({ address: city.trim(), price_min: priceRange[0], price_max: priceRange[1] });

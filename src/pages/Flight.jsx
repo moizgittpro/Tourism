@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import styles from './flight.module.css';
 import { Search, Plane, Calendar, Clock, DollarSign, Award } from 'lucide-react';
+const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
 
 const FlightSearchApp = () => {
   const [fromAirport, setFromAirport] = useState('');
@@ -25,7 +26,7 @@ const FlightSearchApp = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8000/flight', {
+      const response = await fetch(REACT_APP_API_URL+'/flight', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

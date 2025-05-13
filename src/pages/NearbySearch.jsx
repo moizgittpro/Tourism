@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import styles from './nearbysearch.module.css';
 
+const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
 const NearbySearch = () => {
   const [city, setCity] = useState('');
   const [selectedCollection, setSelectedCollection] = useState('tourist_attraction');
@@ -33,7 +34,7 @@ const NearbySearch = () => {
     setSearchPerformed(true);
     
     try {
-      const response = await fetch('http://localhost:8000/get-data', {  
+      const response = await fetch(REACT_APP_API_URL+'get-data', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -224,7 +225,7 @@ const NearbySearch = () => {
                   <div className={styles.place_image}>
                     {place.photo_reference ? (
                       <img 
-                        src={`http://localhost:8000/place-photo?photo_reference=${place.photo_reference}`} 
+                        src={`${REACT_APP_API_URL}/place-photo?photo_reference=${place.photo_reference}`} 
                         alt={place.name}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -323,7 +324,7 @@ const NearbySearch = () => {
             <div className={styles.modal_image}>
               {activePlace.photo_reference ? (
                 <img 
-                  src={`http://localhost:8000/place-photo?photo_reference=${activePlace.photo_reference}`}
+                  src={`${REACT_APP_API_URL}/place-photo?photo_reference=${activePlace.photo_reference}`}
                   alt={activePlace.name}
                   onError={(e) => {
                     e.target.onerror = null;
