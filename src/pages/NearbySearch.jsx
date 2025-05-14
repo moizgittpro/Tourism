@@ -34,7 +34,7 @@ const NearbySearch = () => {
     setSearchPerformed(true);
     
     try {
-      const response = await fetch(REACT_APP_API_URL+'get-data', {  
+      const response = await fetch(REACT_APP_API_URL+'/get-data', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
