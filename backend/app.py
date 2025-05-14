@@ -29,7 +29,6 @@ app.add_middleware(
 
 ## FLIGHT_ROUTES ROUTERS
 app.add_api_route("/flight",endpoint=flight,methods=["POST"])
-app.add_api_route("/flight",endpoint=options_flight,methods=["Options"])
 
 ## RESTAURANT_API ROUTERS
 app.add_api_route("/place-photo",endpoint=place_photo,methods = ["GET"])
