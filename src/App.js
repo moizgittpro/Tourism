@@ -13,7 +13,19 @@ const AccomodationSearch = React.lazy(() => import('./pages/AccomodationSearch')
 function App() {
   return (
     <Router>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: '#333'
+        }}>
+          Loading...
+        </div>
+      }>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/chat" element={<Chat />} />
@@ -21,7 +33,6 @@ function App() {
           <Route path="/restaurants" element={<Restaurant />} />
           <Route path="/nearby-search" element={<NearbySearch/>} />
           <Route path="/accommodation-search" element={<AccomodationSearch/>} />
-          
         </Routes>
       </Suspense>
     </Router>
