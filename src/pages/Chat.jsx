@@ -241,6 +241,11 @@ function Chat() {
     }
   };
 
+  const handleBotResponse = (message) => {
+    setMessages(prev => [...prev, { text: message, sender: 'bot' }]);
+  };
+  
+
   // Modify handleReset to handle session reset
   const handleReset = async () => {
     try {
