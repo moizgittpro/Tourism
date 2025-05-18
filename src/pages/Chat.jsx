@@ -137,7 +137,7 @@ const renderStars = (rating) => {
   return stars;
 };
 
-
+// Main App component
 function Chat() {
   // Existing state
   const [messages, setMessages] = useState([]);
@@ -149,12 +149,11 @@ function Chat() {
   const [restaurants, setRestaurants] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
-
-  // Add new state for session handling
   const [sessionId, setSessionId] = useState(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
+  
+  const chatEndRef = useRef(null);
 
-  // Modify the initialization useEffect
   useEffect(() => {
     const initializeSession = async () => {
       try {
@@ -183,7 +182,7 @@ function Chat() {
     initializeSession();
   }, []);
 
-  // Modify handleSubmit to include session ID
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputText.trim() || !isSessionActive) return;
@@ -240,13 +239,13 @@ function Chat() {
       handleBotResponse("Sorry, I encountered an error. Please try again.");
     }
   };
-
+  
+  // Add bot message to chat
   const handleBotResponse = (message) => {
     setMessages(prev => [...prev, { text: message, sender: 'bot' }]);
   };
   
-
-  // Modify handleReset to handle session reset
+  // Reset the conversation
   const handleReset = async () => {
     try {
       const response = await fetch(`${REACT_APP_API_URL}/reset`, {
