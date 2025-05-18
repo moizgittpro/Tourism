@@ -67,7 +67,14 @@ const RestaurantCard = ({ restaurant }) => {
       <div className="card-content">
         <div className="restaurant-image">
           {restaurant.image ? 
-            <img src={restaurant.image} alt={restaurant.name} /> : 
+            <img
+            src={`${REACT_APP_API_URL}/place-photo?photo_reference=${restaurant.image}`}
+            alt={restaurant.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `${REACT_APP_API_URL}/random-photo`;
+            }}
+          /> : 
             <div className="placeholder-img">No Image</div>
           }
         </div>
@@ -95,7 +102,14 @@ const AttractionCard = ({ attraction }) => {
       <div className="card-content">
         <div className="attraction-image">
           {attraction.photo_reference ? 
-            <img src={attraction.photo_reference} alt={attraction.name} /> : 
+            <img
+            src={`${REACT_APP_API_URL}/place-photo?photo_reference=${attraction.photo_reference}`}
+            alt={attraction.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `${REACT_APP_API_URL}/random-photo`;
+            }}
+          /> : 
             <div className="placeholder-img">No Image</div>
           }
         </div>
@@ -117,6 +131,7 @@ const AttractionCard = ({ attraction }) => {
     </div>
   );
 };
+
 
 // Helper function to render star ratings
 const renderStars = (rating) => {
