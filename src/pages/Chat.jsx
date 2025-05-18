@@ -137,8 +137,7 @@ const renderStars = (rating) => {
   return stars;
 };
 
-// Main App component
-// Add new state variables at the top of the Chat component
+
 function Chat() {
   // Existing state
   const [messages, setMessages] = useState([]);
@@ -279,6 +278,98 @@ function Chat() {
       handleBotResponse("Sorry, I couldn't reset the conversation. Please refresh the page.");
     }
   };
+
+
+  return (
+    <div className="app-container">
+      <div className="chat-container">
+        <div className="chat-header">
+          <h1>Travel Planner Bot</h1>
+          <button className="reset-button" onClick={handleReset}>
+            <i className="fas fa-redo"></i> New Trip
+          </button>
+        </div>
+        
+        <div className="chat-messages">
+          {messages.map((message, index) => (
+            <Message key={index} message={message.text} sender={message.sender} />
+          ))}
+          {isTyping && <TypingIndicator />}
+          <div ref={chatEndRef} />
+        </div>
+        
+        <form className="chat-input" onSubmit={handleSubmit}>
+          <input
+        type="text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder={showSummary ? "Ask anything about your trip..." : `Enter your ${currentStep}...`}
+        disabled={false}
+          />
+      <button type="submit" disabled={!inputText.trim()}>
+        <i className="fas fa-paper-plane"></i>
+      </button>
+        </form>
+      </div>
+      
+      {showSummary && (
+        <div className="summary-container">
+          <div className="summary-header">
+            <h2>Your Trip Summary</h2>
+          </div>
+          
+          <div className="summary-text">
+            <p>{tripSummary}</p>
+          </div>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-plane"></i> Available Flights
+            </h3>
+            <div className="cards-container">
+              {flights.length > 0 ? (
+                flights.map((flight, index) => (
+                  <FlightCard key={index} flight={flight} />
+                ))
+              ) : (
+                <p className="no-data">No flight information available</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-utensils"></i> Recommended Restaurants
+            </h3>
+            <div className="cards-container">
+              {restaurants.length > 0 ? (
+                restaurants.slice(0, 6).map((restaurant, index) => (
+                  <RestaurantCard key={index} restaurant={restaurant} />
+                ))
+              ) : (
+                <p className="no-data">No restaurant information available</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="summary-section">
+            <h3>
+              <i className="fas fa-landmark"></i> Tourist Attractions
+            </h3>
+            <div className="cards-container">
+              {attractions.length > 0 ? (
+                attractions.slice(0, 6).map((attraction, index) => (
+                  <AttractionCard key={index} attraction={attraction} />
+                ))
+              ) : (
+                <p className="no-data">No attraction information available</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Chat;
