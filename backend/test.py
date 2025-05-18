@@ -1,7 +1,7 @@
-# from dotenv import load_dotenv
-# import os 
+from dotenv import load_dotenv
+import os 
 
-# load_dotenv()
+load_dotenv()
 
 
 # places_api_key = os.getenv("google_places_api_key")

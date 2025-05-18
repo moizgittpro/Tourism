@@ -14,10 +14,13 @@ REDIS_URL = os.getenv('REDIS_URL')
 REDIS_TOKEN = os.getenv('REDIS_TOKEN')
 # MongoDB connection
 mongo_client = MongoClient(MONGO_URL, maxPoolSize=100, minPoolSize=10, serverSelectionTimeoutMS=5000)
+
+
 mongo_db = mongo_client['tourism']
 # Create collections with indexes
 airbnb_collection = mongo_db["air_bnb"]
 hotel_collection = mongo_db["hotel"]
+
 
 
 def ensure_indexes():

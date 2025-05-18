@@ -25,6 +25,7 @@ from fast_flights import FlightData, Passengers, Result, get_flights
 from fastapi import FastAPI,Request
 from fastapi.responses import JSONResponse
 from langchain.prompts import ChatPromptTemplate
+from .session_manager import SessionManager
 
 
 # from langchain.chains import LLMChain
@@ -272,7 +273,7 @@ def generate_summary():
     # Step 3: Fetch flights and format
     try:
         # You should use a real date here, not a hardcoded one!
-        flights_raw = fetch_flight_details("KHI", "ISB", "2025-05-10")
+        flights_raw = fetch_flight_details("KHI", "ISB", "2025-05-30")
         flights = []
         for f in flights_raw.get("flights", []):
             flights.append({
@@ -409,20 +410,39 @@ user_state = {
 # current_step ={destination,origin,days,mood,route}
 
 # @app.post("/chat")
+
+session_manager=SessionManager()
 async def chat(request : Request):
+    # Get session ID from headers
+    session_id = request.headers.get("X-Session-ID")
     data = await request.json()
     user_input = data.get("user_input") ## LOGIC IN REACT
     ## USER INPUT IS CURRENTLY I ASSUME 1 WORD ONLY , 
     ## ITS LOGIC WILL BE FURTHER EXECUTED IN REACT WHERE 
     ## USER_INPUT WILL BE STRIPPED TO 1 WORD ONLY
-    step = user_state["current_step"]
-    return_json = ""
+    # Create new session if none exists
+    if not session_id or not session_manager.get_session(session_id):
+        session_id = session_manager.create_session()
+        return JSONResponse(content={
+            "message": "Hello! I can help you plan your trip. Please tell me your destination.",
+            "step": "destination",
+            "session_id": session_id
+        })
+    
+    # Get session data
+    session = session_manager.get_session(session_id)
+    step = session["current_step"]
+    states = session["states"]
+    system_message = session["system_message"]
+
+   
+   
 
     if step == "destination":
         response = get_destination(user_input)
         if response["status"] == "success":
-            user_state["current_step"] = "origin"
-            states["destination"] = user_input
+            session["current_step"] = "origin"
+            session["states"]["destination"] = user_input
             template = response["template"]
             return_json = model.invoke(template).content
         else:
@@ -497,7 +517,8 @@ async def chat(request : Request):
 
     return JSONResponse(content={
         "message": return_json,
-        "step": user_state["current_step"]
+        "step": session["current_step"],
+        "session_id": session_id
     })
 
 
@@ -581,20 +602,17 @@ def get_data_sync(collection_name: str, city: str):
         
 
 # @app.post("/reset")
-async def reset_conversation():
-    global user_state, states, system_message
+async def reset_conversation(request: Request):
+    data = await request.json()
+    session_id = data.get("session_id")
     
-    user_state = {
-        "current_step": "destination",
-        "inputs": {}
-    }
-    
-    states = {}
-    system_message = []
+    # Create new session
+    new_session_id = session_manager.create_session()
     
     return JSONResponse(content={
-        "message": "Hello! I can help you plan your trip. Please tell me your destination.", 
-        "step": "destination"
+        "message": "Hello! I can help you plan your trip. Please tell me your destination.",
+        "step": "destination",
+        "session_id": new_session_id
     })
         
 

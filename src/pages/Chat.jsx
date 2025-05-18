@@ -192,7 +192,7 @@ function Chat() {
         setCurrentStep(data.step);
       }
       
-      // Handle summary data if present
+      
       // Handle summary data if present
       if (data.trip_summary) {
         setTripSummary(data.trip_summary);
