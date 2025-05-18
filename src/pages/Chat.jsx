@@ -138,7 +138,9 @@ const renderStars = (rating) => {
 };
 
 // Main App component
+// Add new state variables at the top of the Chat component
 function Chat() {
+  // Existing state
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -148,52 +150,76 @@ function Chat() {
   const [restaurants, setRestaurants] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
-  
-  const chatEndRef = useRef(null);
 
-  // Auto scroll to bottom of chat
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isTyping]);
+  // Add new state for session handling
+  const [sessionId, setSessionId] = useState(null);
+  const [isSessionActive, setIsSessionActive] = useState(false);
 
-  // Initialize the chat
+  // Modify the initialization useEffect
   useEffect(() => {
-    // Show initial bot message
-    handleBotResponse("Hello! I can help you plan your trip. Please tell me your destination.");
+    const initializeSession = async () => {
+      try {
+        // Initialize session with backend
+        const response = await fetch(`${REACT_APP_API_URL}/chat/init`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const data = await response.json();
+        if (data.sessionId) {
+          setSessionId(data.sessionId);
+          setIsSessionActive(true);
+        }
+        
+        // Show initial bot message
+        handleBotResponse("Hello! I can help you plan your trip. Please tell me your destination.");
+      } catch (error) {
+        console.error('Error initializing session:', error);
+        handleBotResponse("Sorry, I couldn't start a new session. Please try refreshing the page.");
+      }
+    };
+
+    initializeSession();
   }, []);
 
-  // Handle form submission
+  // Modify handleSubmit to include session ID
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !isSessionActive) return;
     
-    // Add user message to chat
     const userMessage = inputText.trim();
     setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
     setInputText('');
     setIsTyping(true);
     
     try {
-      // Send user input to backend
-      const response = await fetch(REACT_APP_API_URL+'/chat', {
+      const response = await fetch(`${REACT_APP_API_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Session-ID': sessionId
         },
-        body: JSON.stringify({ user_input: userMessage }),
+        body: JSON.stringify({ 
+          user_input: userMessage,
+          session_id: sessionId
+        }),
       });
       
       const data = await response.json();
       
-      // Update current step
+      if (data.session_expired) {
+        setIsSessionActive(false);
+        handleBotResponse("Your session has expired. Please start a new conversation.");
+        return;
+      }
+      
+      // Rest of your existing handleSubmit logic
       if (data.step) {
         setCurrentStep(data.step);
       }
       
-      
-      // Handle summary data if present
       if (data.trip_summary) {
         setTripSummary(data.trip_summary);
         setFlights(data.flights || []);
@@ -202,10 +228,8 @@ function Chat() {
         setShowSummary(true);
       }
 
-      // Only add bot message if it's not the summary (avoid duplicate)
       setTimeout(() => {
         setIsTyping(false);
-        // If this is a summary response, don't add it as a chat bubble
         if (!data.trip_summary) {
           handleBotResponse(data.message);
         }
@@ -217,17 +241,16 @@ function Chat() {
       handleBotResponse("Sorry, I encountered an error. Please try again.");
     }
   };
-  
-  // Add bot message to chat
-  const handleBotResponse = (message) => {
-    setMessages(prev => [...prev, { text: message, sender: 'bot' }]);
-  };
-  
-  // Reset the conversation
+
+  // Modify handleReset to handle session reset
   const handleReset = async () => {
     try {
-      const response = await fetch('/reset', {
+      const response = await fetch(`${REACT_APP_API_URL}/reset`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId
+        }
       });
       
       const data = await response.json();
@@ -241,7 +264,12 @@ function Chat() {
       setAttractions([]);
       setShowSummary(false);
       
-      // Add initial bot message
+      // Get new session ID
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+        setIsSessionActive(true);
+      }
+      
       setTimeout(() => {
         handleBotResponse(data.message);
       }, 500);
@@ -251,97 +279,6 @@ function Chat() {
       handleBotResponse("Sorry, I couldn't reset the conversation. Please refresh the page.");
     }
   };
-
-  return (
-    <div className="app-container">
-      <div className="chat-container">
-        <div className="chat-header">
-          <h1>Travel Planner Bot</h1>
-          <button className="reset-button" onClick={handleReset}>
-            <i className="fas fa-redo"></i> New Trip
-          </button>
-        </div>
-        
-        <div className="chat-messages">
-          {messages.map((message, index) => (
-            <Message key={index} message={message.text} sender={message.sender} />
-          ))}
-          {isTyping && <TypingIndicator />}
-          <div ref={chatEndRef} />
-        </div>
-        
-        <form className="chat-input" onSubmit={handleSubmit}>
-          <input
-        type="text"
-        value={inputText}
-        onChange={(e) => setInputText(e.target.value)}
-        placeholder={showSummary ? "Ask anything about your trip..." : `Enter your ${currentStep}...`}
-        disabled={false}
-          />
-      <button type="submit" disabled={!inputText.trim()}>
-        <i className="fas fa-paper-plane"></i>
-      </button>
-        </form>
-      </div>
-      
-      {showSummary && (
-        <div className="summary-container">
-          <div className="summary-header">
-            <h2>Your Trip Summary</h2>
-          </div>
-          
-          <div className="summary-text">
-            <p>{tripSummary}</p>
-          </div>
-          
-          <div className="summary-section">
-            <h3>
-              <i className="fas fa-plane"></i> Available Flights
-            </h3>
-            <div className="cards-container">
-              {flights.length > 0 ? (
-                flights.map((flight, index) => (
-                  <FlightCard key={index} flight={flight} />
-                ))
-              ) : (
-                <p className="no-data">No flight information available</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="summary-section">
-            <h3>
-              <i className="fas fa-utensils"></i> Recommended Restaurants
-            </h3>
-            <div className="cards-container">
-              {restaurants.length > 0 ? (
-                restaurants.slice(0, 6).map((restaurant, index) => (
-                  <RestaurantCard key={index} restaurant={restaurant} />
-                ))
-              ) : (
-                <p className="no-data">No restaurant information available</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="summary-section">
-            <h3>
-              <i className="fas fa-landmark"></i> Tourist Attractions
-            </h3>
-            <div className="cards-container">
-              {attractions.length > 0 ? (
-                attractions.slice(0, 6).map((attraction, index) => (
-                  <AttractionCard key={index} attraction={attraction} />
-                ))
-              ) : (
-                <p className="no-data">No attraction information available</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default Chat;
