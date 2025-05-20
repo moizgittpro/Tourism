@@ -97,7 +97,10 @@ const AccommodationSearch = () => {
     // Convert page_id to string to ensure proper concatenation
     const pageIdString = String(page_id);
     console.log("Opening link:", baseUrl + pageIdString);
-    return window.open(baseUrl + pageIdString, "_blank");
+    if (accommodationType == "airbnbs"){
+      return window.open(baseUrl + pageIdString, "_blank");
+    }
+    return window.open(baseUrl + pageIdString+".html", "_blank");
   }
   const getStarRating = (review_score, review_count) => {
     if (review_count === "No reviews yet") return <span className={styles["noRating"]}>No ratings yet</span>;
