@@ -229,7 +229,10 @@ const NearbySearch = () => {
                         alt={place.name}
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = "/api/placeholder/400/300";
+                          const fallback ="/api/placeholder/400/300";
+                          if(e.target.src !== fallback){
+                            e.target.src=fallback;
+                          }
                         }}
                       />
                     ) : (
