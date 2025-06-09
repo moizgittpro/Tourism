@@ -109,7 +109,10 @@ const Restaurant = () => {
                       alt={restaurant.name}
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = REACT_APP_API_URL+'/random-photo';
+                        const fallback = REACT_APP_API_URL+'/random-photo';
+                        if(e.target.src !== fallback){
+                          e.target.src=fallback;
+                        }
                       }}
                     />
                   </>
