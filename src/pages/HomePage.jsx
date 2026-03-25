@@ -244,24 +244,6 @@ const HomePage = () => {
     </div>
     <p className="text-blue-700 font-semibold">Plan My Trip</p>
   </Link>
-  <Link to="/flights" className="feature-card hero-action-btn">
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-blue-500 mb-3 shadow-lg">
-      <Plane className="text-white" size={24} />
-    </div>
-    <p className="text-green-700 font-semibold">Find Flights</p>
-  </Link>
-  <Link to="/restaurants" className="feature-card hero-action-btn">
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-pink-400 to-yellow-400 mb-3 shadow-lg">
-      <Utensils className="text-white" size={24} />
-    </div>
-    <p className="text-pink-700 font-semibold">Find Restaurants</p>
-  </Link>
-  <Link to="/nearby-search" className="feature-card hero-action-btn">
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 mb-3 shadow-lg">
-      <Search className="text-white" size={24} />
-    </div>
-    <p className="text-purple-700 font-semibold">Explore Destinations</p>
-  </Link>
   <Link to="/accommodation-search" className="feature-card hero-action-btn">
     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-yellow-400 to-green-400 mb-3 shadow-lg">
       <Hotel className="text-white" size={24} />
