@@ -29,9 +29,6 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/flights" element={<Flight />} />
-          <Route path="/restaurants" element={<Restaurant />} />
-          <Route path="/nearby-search" element={<NearbySearch/>} />
           <Route path="/accommodation-search" element={<AccomodationSearch/>} />
         </Routes>
       </Suspense>
