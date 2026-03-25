@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Plane, Utensils, Search, Hotel, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, MapPin, Hotel, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import './HomePage.css';
 import hunzaImage from '../images/hunza.jpg';
 import historicalImage from '../images/mohenjo-daro.jpg';
