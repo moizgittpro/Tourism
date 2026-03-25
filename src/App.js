@@ -4,9 +4,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Lazy load your pages
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const Chat = React.lazy(() => import('./pages/Chat'));
-const Flight = React.lazy(() => import('./pages/Flight'));
-const Restaurant = React.lazy(() => import('./pages/Restaurant'));
-const NearbySearch = React.lazy(() => import('./pages/NearbySearch'));
 const AccomodationSearch = React.lazy(() => import('./pages/AccomodationSearch'));
 
 
