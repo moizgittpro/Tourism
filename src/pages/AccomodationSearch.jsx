@@ -97,7 +97,7 @@ const AccommodationSearch = () => {
     // Convert page_id to string to ensure proper concatenation
     const pageIdString = String(page_id);
     console.log("Opening link:", baseUrl + pageIdString);
-    if (accommodationType == "airbnbs"){
+    if (accommodationType === "airbnbs"){
       return window.open(baseUrl + pageIdString, "_blank");
     }
     return window.open(baseUrl + pageIdString+".html", "_blank");
