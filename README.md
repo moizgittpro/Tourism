@@ -31,14 +31,14 @@ This app uses AI to plan your journey
 
 ---
 
-## 📦 How It Works
+## How It Works
 
 1. User chats with the bot (origin, destination, mood, travel days)
 2. Bot builds full itinerary + fetches real-time data
 
 ---
 
-## 🧭 Future Scope
+## Future Scope
 
 - Expand beyond Pakistan  
 - Community-driven itineraries  
