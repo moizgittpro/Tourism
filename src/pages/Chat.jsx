@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './journey_curator.css';
 const REACT_APP_API_URL = process.env.REACT_APP_API_BASE_URL;
 
+const getSessionIdFromPayload = (payload) => payload?.session_id || payload?.sessionId || null;
+
 // Message component for chat bubbles
 const Message = ({ message, sender }) => {
   return (
@@ -181,13 +183,14 @@ function Chat() {
         });
         
         const data = await response.json();
-        if (data.sessionId) {
-          setSessionId(data.sessionId);
+        const nextSessionId = getSessionIdFromPayload(data);
+        if (nextSessionId) {
+          setSessionId(nextSessionId);
           setIsSessionActive(true);
         }
         
         // Show initial bot message
-        handleBotResponse("Hello! I can help you plan your trip. Please tell me your destination.");
+        handleBotResponse(data.message || "Hello! I can help you plan your trip. Please tell me your destination.");
       } catch (error) {
         console.error('Error initializing session:', error);
         handleBotResponse("Sorry, I couldn't start a new session. Please try refreshing the page.");
@@ -221,10 +224,21 @@ function Chat() {
       });
       
       const data = await response.json();
+      const nextSessionId = getSessionIdFromPayload(data);
+      if (nextSessionId) {
+        setSessionId(nextSessionId);
+        setIsSessionActive(true);
+      }
       
       if (data.session_expired) {
-        setIsSessionActive(false);
-        handleBotResponse("Your session has expired. Please start a new conversation.");
+        setCurrentStep(data.step || 'destination');
+        setShowSummary(false);
+        setTripSummary(null);
+        setFlights([]);
+        setRestaurants([]);
+        setAttractions([]);
+        setIsTyping(false);
+        handleBotResponse(data.message || "Your session expired. Let's start again.");
         return;
       }
       
@@ -268,7 +282,10 @@ function Chat() {
         headers: {
           'Content-Type': 'application/json',
           'X-Session-ID': sessionId
-        }
+        },
+        body: JSON.stringify({
+          session_id: sessionId
+        }),
       });
       
       const data = await response.json();
@@ -283,8 +300,9 @@ function Chat() {
       setShowSummary(false);
       
       // Get new session ID
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
+      const nextSessionId = getSessionIdFromPayload(data);
+      if (nextSessionId) {
+        setSessionId(nextSessionId);
         setIsSessionActive(true);
       }
       
