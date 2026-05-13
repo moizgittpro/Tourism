@@ -1,9 +1,63 @@
-from fastapi import Request, HTTPException
+import json
+import logging
+import os
+
+from fastapi import HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
-import json
-from routes.connection import redis_client
 from fast_flights import FlightData, Passengers, Result, get_flights
+from routes.connection import redis_client
+
+logger = logging.getLogger(__name__)
+
+
+def _get_fetch_modes():
+    raw_modes = os.getenv("FAST_FLIGHTS_FETCH_MODES", "common,fallback,force-fallback")
+    modes = []
+    for mode in (part.strip() for part in raw_modes.split(",")):
+        if mode and mode not in modes:
+            modes.append(mode)
+    return modes or ["fallback"]
+
+
+async def _fetch_flights(date: str, from_airport: str, to_airport: str):
+    last_error = None
+
+    for fetch_mode in _get_fetch_modes():
+        try:
+            return await run_in_threadpool(
+                get_flights,
+                flight_data=[
+                    FlightData(
+                        date=date,
+                        from_airport=from_airport,
+                        to_airport=to_airport,
+                    )
+                ],
+                trip="one-way",
+                seat="economy",
+                passengers=Passengers(
+                    adults=1,
+                    children=0,
+                    infants_in_seat=0,
+                    infants_on_lap=0,
+                ),
+                fetch_mode=fetch_mode,
+            )
+        except Exception as exc:
+            last_error = exc
+            logger.warning(
+                "Flight lookup failed for %s -> %s on %s using mode '%s': %s",
+                from_airport,
+                to_airport,
+                date,
+                fetch_mode,
+                exc,
+            )
+
+    raise RuntimeError(
+        "Flight provider lookup failed in all configured modes."
+    ) from last_error
 
 async def options_flight():
     return JSONResponse(
@@ -24,6 +78,16 @@ async def flight(request: Request):
 
         if not all([date, from_airport, to_airport]):
             raise HTTPException(status_code=400, detail="Incomplete flight data.")
+        if (
+            len(from_airport) != 3
+            or len(to_airport) != 3
+            or not from_airport.isalpha()
+            or not to_airport.isalpha()
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Airport codes must be valid 3-letter IATA codes.",
+            )
 
         cache_key = f"flights:{from_airport}:{to_airport}:{date}"
         try:
@@ -34,14 +98,7 @@ async def flight(request: Request):
         if cached_data:
             return JSONResponse(content=json.loads(cached_data))
 
-        result = await run_in_threadpool(
-            get_flights,
-            flight_data=[FlightData(date=date, from_airport=from_airport, to_airport=to_airport)],
-            trip="one-way",
-            seat="economy",
-            passengers=Passengers(adults=1, children=0, infants_in_seat=0, infants_on_lap=0),
-            fetch_mode="fallback",
-        )
+        result = await _fetch_flights(date, from_airport, to_airport)
 
         flights_data = [
             {
@@ -58,14 +115,26 @@ async def flight(request: Request):
             for f in result.flights
         ]
         try:
-            redis_client.setex(cache_key, 3600, json.dumps(flights_data))
+            if flights_data:
+                redis_client.setex(cache_key, 3600, json.dumps(flights_data))
         except Exception:
             pass
         return JSONResponse(content=flights_data)
 
+    except HTTPException:
+        raise
+    except RuntimeError as e:
+        logger.exception("Flight provider failure for %s -> %s on %s", from_airport, to_airport, date)
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Flight search is temporarily unavailable in this deployment. "
+                "The upstream provider blocked or failed the lookup."
+            ),
+        ) from e
     except Exception as e:
-        print(f"Flight API error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected flight API error")
+        raise HTTPException(status_code=500, detail="Unexpected server error while searching flights.") from e
 
 
 def fetch_flight_details(from_airport: str, to_airport: str, date: str):

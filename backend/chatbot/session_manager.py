@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 
@@ -6,6 +7,8 @@ try:
     from routes.connection import redis_client
 except Exception:
     redis_client = None
+
+logger = logging.getLogger(__name__)
 
 class SessionManager:
     def __init__(self):
@@ -17,8 +20,10 @@ class SessionManager:
         return f"{self.redis_prefix}{session_id}"
 
     def _default_session_payload(self):
+        now = datetime.now().isoformat()
         return {
-            "created_at": datetime.now().isoformat(),
+            "created_at": now,
+            "updated_at": now,
             "states": {
                 "destination": None,
                 "origin": None,
@@ -31,6 +36,7 @@ class SessionManager:
         }
 
     def _store_session(self, session_id, payload):
+        payload["updated_at"] = datetime.now().isoformat()
         self.sessions[session_id] = payload
         if redis_client is not None:
             try:
@@ -40,12 +46,13 @@ class SessionManager:
                     json.dumps(payload),
                 )
             except Exception:
-                pass
+                logger.exception("Failed to persist session %s to Redis", session_id)
 
     def create_session(self):
         """Create a new session with unique ID"""
         session_id = str(uuid.uuid4())
         self._store_session(session_id, self._default_session_payload())
+        logger.info("Created chat session %s", session_id)
         return session_id
 
     def get_session(self, session_id):
@@ -53,6 +60,7 @@ class SessionManager:
         self.cleanup_old_sessions()
         session = self.sessions.get(session_id)
         if session:
+            self._store_session(session_id, session)
             return session
 
         if redis_client is None or not session_id:
@@ -61,6 +69,7 @@ class SessionManager:
         try:
             cached_session = redis_client.get(self._redis_key(session_id))
         except Exception:
+            logger.exception("Failed to fetch session %s from Redis", session_id)
             return None
 
         if not cached_session:
@@ -70,7 +79,7 @@ class SessionManager:
             cached_session = cached_session.decode("utf-8")
 
         session = json.loads(cached_session)
-        self.sessions[session_id] = session
+        self._store_session(session_id, session)
         return session
 
     def save_session(self, session_id, session_data):
@@ -83,7 +92,8 @@ class SessionManager:
             try:
                 redis_client.delete(self._redis_key(session_id))
             except Exception:
-                pass
+                logger.exception("Failed to delete session %s from Redis", session_id)
+        logger.info("Deleted chat session %s", session_id)
 
     def cleanup_old_sessions(self):
         """Remove expired sessions"""
@@ -96,7 +106,7 @@ class SessionManager:
             del self.sessions[sid]
 
     def _session_age_exceeded(self, current_time, data):
-        created_at = data.get("created_at")
+        created_at = data.get("updated_at") or data.get("created_at")
         if isinstance(created_at, str):
             created_at = datetime.fromisoformat(created_at)
         return current_time - created_at > self.cleanup_interval

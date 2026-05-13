@@ -185,46 +185,104 @@ Question: {user_input}
 session_manager = SessionManager()
 
 
-async def chat(request: Request):
-    data = await request.json()
-    session_id = request.headers.get("X-Session-ID") or data.get("session_id")
-    user_input = normalize_input(data.get("user_input"))
+def _response_payload(message: str, step: str, session_id: str, **extra):
+    payload = {
+        "message": message,
+        "step": step,
+        "session_id": session_id,
+        "sessionId": session_id,
+    }
+    payload.update(extra)
+    return payload
 
+
+async def _parse_json(request: Request) -> dict[str, Any]:
+    try:
+        data = await request.json()
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _extract_session_id(request: Request, data: dict[str, Any]) -> str | None:
+    return (
+        request.headers.get("X-Session-ID")
+        or data.get("session_id")
+        or data.get("sessionId")
+    )
+
+
+async def init_chat(request: Request):
+    data = await _parse_json(request)
+    session_id = _extract_session_id(request, data)
     session = session_manager.get_session(session_id) if session_id else None
+
     if not session:
         session_id = session_manager.create_session()
         session = session_manager.get_session(session_id)
 
+    logger.info("Initialized chat session %s", session_id)
+    return JSONResponse(
+        content=_response_payload(
+            STEP_PROMPTS[session["current_step"]],
+            session["current_step"],
+            session_id,
+        )
+    )
+
+
+async def chat(request: Request):
+    data = await _parse_json(request)
+    session_id = _extract_session_id(request, data)
+    user_input = normalize_input(data.get("user_input"))
+
+    had_session_id = bool(session_id)
+    session = session_manager.get_session(session_id) if session_id else None
+
+    if had_session_id and not session:
+        logger.warning("Chat session expired or missing: %s", session_id)
+        new_session_id = session_manager.create_session()
+        return JSONResponse(
+            content=_response_payload(
+                "Your previous session expired. Let's start a new trip plan.",
+                "destination",
+                new_session_id,
+                session_expired=True,
+            )
+        )
+
+    if not session:
+        session_id = session_manager.create_session()
+        session = session_manager.get_session(session_id)
+        logger.info("Created fallback chat session %s during /chat request", session_id)
+
     if not user_input:
         return JSONResponse(
-            content={
-                "message": STEP_PROMPTS[session["current_step"]],
-                "step": session["current_step"],
-                "session_id": session_id,
-            }
+            content=_response_payload(
+                STEP_PROMPTS[session["current_step"]],
+                session["current_step"],
+                session_id,
+            )
         )
 
     step = session["current_step"]
+    logger.info("Processing chat session %s at step %s", session_id, step)
 
     if step == "chat":
         response = await get_chat_response(user_input)
         message = response["output"] if response["status"] == "success" else f"Error: {response['message']}"
         return JSONResponse(
-            content={
-                "message": message,
-                "step": "chat",
-                "session_id": session_id,
-            }
+            content=_response_payload(message, "chat", session_id)
         )
 
     is_valid, value_or_message = validate_user_input(step, user_input)
     if not is_valid:
         return JSONResponse(
-            content={
-                "message": f"Error: {value_or_message}",
-                "step": step,
-                "session_id": session_id,
-            }
+            content=_response_payload(
+                f"Error: {value_or_message}",
+                step,
+                session_id,
+            )
         )
 
     session["states"][step] = value_or_message
@@ -236,23 +294,23 @@ async def chat(request: Request):
         summary_response = await generate_summary(session["states"])
         if summary_response["status"] != "success":
             return JSONResponse(
-                content={
-                    "message": f"Error: {summary_response['message']}",
-                    "step": "route",
-                    "session_id": session_id,
-                }
+                content=_response_payload(
+                    f"Error: {summary_response['message']}",
+                    "route",
+                    session_id,
+                )
             )
 
         return JSONResponse(
-            content={
-                "message": summary_response["trip_summary"],
-                "step": "chat",
-                "session_id": session_id,
-                "trip_summary": summary_response["trip_summary"],
-                "flights": summary_response["flights"],
-                "restaurants": summary_response["restaurants"],
-                "tourist_attractions": summary_response["tourist_attractions"],
-            }
+            content=_response_payload(
+                summary_response["trip_summary"],
+                "chat",
+                session_id,
+                trip_summary=summary_response["trip_summary"],
+                flights=summary_response["flights"],
+                restaurants=summary_response["restaurants"],
+                tourist_attractions=summary_response["tourist_attractions"],
+            )
         )
 
     next_step = NEXT_STEP[step]
@@ -260,11 +318,11 @@ async def chat(request: Request):
     session_manager.save_session(session_id, session)
 
     return JSONResponse(
-        content={
-            "message": STEP_PROMPTS[next_step],
-            "step": next_step,
-            "session_id": session_id,
-        }
+        content=_response_payload(
+            STEP_PROMPTS[next_step],
+            next_step,
+            session_id,
+        )
     )
 
 
@@ -305,18 +363,19 @@ def get_data_sync(collection_name: str, city: str):
 
 
 async def reset_conversation(request: Request):
-    data = await request.json()
-    session_id = data.get("session_id")
+    data = await _parse_json(request)
+    session_id = _extract_session_id(request, data)
     if session_id:
         session_manager.delete_session(session_id)
 
     new_session_id = session_manager.create_session()
+    logger.info("Reset chat session %s -> %s", session_id, new_session_id)
     return JSONResponse(
-        content={
-            "message": STEP_PROMPTS["destination"],
-            "step": "destination",
-            "session_id": new_session_id,
-        }
+        content=_response_payload(
+            STEP_PROMPTS["destination"],
+            "destination",
+            new_session_id,
+        )
     )
 
 
