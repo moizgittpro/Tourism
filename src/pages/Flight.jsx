@@ -22,6 +22,11 @@ const FlightSearchApp = () => {
       return;
     }
 
+    if (!REACT_APP_API_URL) {
+      setError('Frontend configuration is missing REACT_APP_API_BASE_URL.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     
@@ -43,13 +48,16 @@ const FlightSearchApp = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch flights');
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(
+          errorPayload?.detail || `Flight search failed with status ${response.status}.`
+        );
       }
 
       const data = await response.json();
       setFlights(data);
     } catch (err) {
-      setError('Error fetching flights. Please Enter Correct Airport Code.');
+      setError(err.message || 'Error fetching flights. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -186,8 +194,9 @@ const FlightSearchApp = () => {
                 id="fromAirport"
                 type="text"
                 value={fromAirport}
-                onChange={(e) => setFromAirport(e.target.value)}
+                onChange={(e) => setFromAirport(e.target.value.toUpperCase())}
                 placeholder="Enter departure airport"
+                maxLength={3}
                 className={styles.textInput}
               />
             </div>
@@ -198,8 +207,9 @@ const FlightSearchApp = () => {
                 id="toAirport"
                 type="text"
                 value={toAirport}
-                onChange={(e) => setToAirport(e.target.value)}
+                onChange={(e) => setToAirport(e.target.value.toUpperCase())}
                 placeholder="Enter arrival airport"
+                maxLength={3}
                 className={styles.textInput}
               />
             </div>
