@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Plane, Utensils, Search, Hotel, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, MapPin, Plane, Hotel, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import './HomePage.css';
 import hunzaImage from '../images/hunza.jpg';
 import historicalImage from '../images/mohenjo-daro.jpg';
@@ -172,8 +172,6 @@ const HomePage = () => {
             <Link to="/chat" className="nav-link">Plan My Trip</Link>
             <Link to="/flights" className="nav-link">Flights</Link>
             <Link to="/accommodation-search" className="nav-link">Accomodations</Link>
-            <Link to="/nearby-search" className="nav-link">Explore Pakistan</Link>
-            <Link to="/restaurants" className="nav-link">Restaurants</Link>
           </nav>
 
           
@@ -192,8 +190,6 @@ const HomePage = () => {
             <Link to="/chat" className="block py-2 hover:text-blue-600 transition">Plan My Trip</Link>
             <Link to="/flights" className="block py-2 hover:text-blue-600 transition">Flights</Link>
             <Link to="/accommodation-search" className="block py-2 hover:text-blue-600 transition">Accomodations</Link>
-            <Link to="/nearby-search" className="block py-2 hover:text-blue-600 transition">Explore Pakistan</Link>
-            <Link to="/restaurants" className="block py-2 hover:text-blue-600 transition">Restaurants</Link>
             <div className="pt-4 flex flex-col space-y-3">
              
             </div>
@@ -250,18 +246,6 @@ const HomePage = () => {
     </div>
     <p className="text-green-700 font-semibold">Find Flights</p>
   </Link>
-  <Link to="/restaurants" className="feature-card hero-action-btn">
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-pink-400 to-yellow-400 mb-3 shadow-lg">
-      <Utensils className="text-white" size={24} />
-    </div>
-    <p className="text-pink-700 font-semibold">Find Restaurants</p>
-  </Link>
-  <Link to="/nearby-search" className="feature-card hero-action-btn">
-    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 mb-3 shadow-lg">
-      <Search className="text-white" size={24} />
-    </div>
-    <p className="text-purple-700 font-semibold">Explore Destinations</p>
-  </Link>
   <Link to="/accommodation-search" className="feature-card hero-action-btn">
     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-yellow-400 to-green-400 mb-3 shadow-lg">
       <Hotel className="text-white" size={24} />
@@ -288,10 +272,6 @@ const HomePage = () => {
               <h2 className="text-3xl md:text-4xl font-bold mb-3">Popular Destinations</h2>
               <p className="text-gray-600 max-w-2xl">Discover the most breathtaking and awe-inspiring places Pakistan has to offer</p>
             </div>
-            <Link to="/nearby-search" className="flex items-center text-blue-600 mt-4 md:mt-0 hover:text-blue-800 transition group">
-              View all destinations
-              <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -365,13 +345,6 @@ const HomePage = () => {
                         </li>
                       ))}
                     </ul>
-                    <Link 
-                      to={`/nearby-search`}
-                      className="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
-                    >
-                      View all {category.name}
-                      <ArrowRight size={16} className="ml-2" />
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -527,9 +500,6 @@ const HomePage = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Link to="/chat" className="px-8 py-3 bg-white text-blue-600 rounded-full font-medium hover:bg-opacity-90 transition duration-300 shadow-lg">
               Plan My Journey
-            </Link>
-            <Link to="/nearby-search" className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white hover:bg-opacity-10 transition duration-300">
-              Browse Tourist Attractions
             </Link>
           </div>
         </div>

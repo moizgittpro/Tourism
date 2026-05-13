@@ -59,101 +59,6 @@ const FlightCard = ({ flight }) => {
   );
 };
 
-const RestaurantCard = ({ restaurant }) => {
-  return (
-    <div className="summary-card restaurant-card">
-      <div className="card-header">
-        <i className="fa-solid fa-utensils"></i>
-        <h3>{restaurant.name || "Restaurant"}</h3>
-      </div>
-      <div className="card-content">
-        <div className="restaurant-image">
-          {restaurant.image ? 
-            <img
-            src={`${REACT_APP_API_URL}/place-photo?photo_reference=${restaurant.image}`}
-            alt={restaurant.name}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = `${REACT_APP_API_URL}/random-photo`;
-            }}
-          /> : 
-            <div className="placeholder-img">No Image</div>
-          }
-        </div>
-        <div className="restaurant-details">
-          <p><strong>Address:</strong> {restaurant.address || "N/A"}</p>
-          <p><strong>Cuisine:</strong> {restaurant.types?.join(", ") || "Various"}</p>
-          <div className="rating">
-            <strong>Rating:</strong> 
-            <span className="stars">{renderStars(restaurant.rating || 0)}</span>
-            <span className="rating-value">({restaurant.rating || "N/A"})</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const AttractionCard = ({ attraction }) => {
-  return (
-    <div className="summary-card attraction-card">
-      <div className="card-header">
-        <i className="fa-solid fa-landmark"></i>
-        <h3>{attraction.name || "Attraction"}</h3>
-      </div>
-      <div className="card-content">
-        <div className="attraction-image">
-          {attraction.photo_reference ? 
-            <img
-            src={`${REACT_APP_API_URL}/place-photo?photo_reference=${attraction.photo_reference}`}
-            alt={attraction.name}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = `${REACT_APP_API_URL}/random-photo`;
-            }}
-          /> : 
-            <div className="placeholder-img">No Image</div>
-          }
-        </div>
-        <div className="attraction-details">
-          <p><strong>Address:</strong> {attraction.address || "N/A"}</p>
-          <p><strong>Type:</strong> {attraction.types?.join(", ") || "Tourist Spot"}</p>
-          <div className="rating">
-            <strong>Rating:</strong>
-            <span className="stars">{renderStars(attraction.rating || 0)}</span>
-            <span className="rating-value">({attraction.rating || "N/A"}) from {attraction.user_ratings_total || 0} reviews</span>
-          </div>
-          {attraction.open_now !== undefined && 
-            <p className={`open-status ${attraction.open_now ? "open" : "closed"}`}>
-              {attraction.open_now ? "Open Now" : "Closed"}
-            </p>
-          }
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-// Helper function to render star ratings
-const renderStars = (rating) => {
-  const stars = [];
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  
-  for (let i = 0; i < 5; i++) {
-    if (i < fullStars) {
-      stars.push(<i key={i} className="fas fa-star"></i>);
-    } else if (i === fullStars && hasHalfStar) {
-      stars.push(<i key={i} className="fas fa-star-half-alt"></i>);
-    } else {
-      stars.push(<i key={i} className="far fa-star"></i>);
-    }
-  }
-  
-  return stars;
-};
-
 // Main App component
 function Chat() {
   // Existing state
@@ -163,8 +68,6 @@ function Chat() {
   const [currentStep, setCurrentStep] = useState('destination');
   const [tripSummary, setTripSummary] = useState(null);
   const [flights, setFlights] = useState([]);
-  const [restaurants, setRestaurants] = useState([]);
-  const [attractions, setAttractions] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -235,8 +138,6 @@ function Chat() {
         setShowSummary(false);
         setTripSummary(null);
         setFlights([]);
-        setRestaurants([]);
-        setAttractions([]);
         setIsTyping(false);
         handleBotResponse(data.message || "Your session expired. Let's start again.");
         return;
@@ -250,8 +151,6 @@ function Chat() {
       if (data.trip_summary) {
         setTripSummary(data.trip_summary);
         setFlights(data.flights || []);
-        setRestaurants(data.restaurants || []);
-        setAttractions(data.tourist_attractions || []);
         setShowSummary(true);
       }
 
@@ -295,8 +194,6 @@ function Chat() {
       setCurrentStep('destination');
       setTripSummary(null);
       setFlights([]);
-      setRestaurants([]);
-      setAttractions([]);
       setShowSummary(false);
       
       // Get new session ID
@@ -374,35 +271,6 @@ function Chat() {
             </div>
           </div>
           
-          <div className="summary-section">
-            <h3>
-              <i className="fas fa-utensils"></i> Recommended Restaurants
-            </h3>
-            <div className="cards-container">
-              {restaurants.length > 0 ? (
-                restaurants.slice(0, 6).map((restaurant, index) => (
-                  <RestaurantCard key={index} restaurant={restaurant} />
-                ))
-              ) : (
-                <p className="no-data">No restaurant information available</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="summary-section">
-            <h3>
-              <i className="fas fa-landmark"></i> Tourist Attractions
-            </h3>
-            <div className="cards-container">
-              {attractions.length > 0 ? (
-                attractions.slice(0, 6).map((attraction, index) => (
-                  <AttractionCard key={index} attraction={attraction} />
-                ))
-              ) : (
-                <p className="no-data">No attraction information available</p>
-              )}
-            </div>
-          </div>
         </div>
       )}
     </div>
