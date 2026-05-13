@@ -1,22 +1,9 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 import json
-from routes.connection import mongo_db, redis_client
-from flights_main.fast_flights import FlightData, Passengers, Result, get_flights
-
-
-
-# app = FastAPI()
-
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"], 
-#     allow_credentials=True,
-#     allow_methods=["GET", "POST", "OPTIONS"],  
-#     allow_headers=["*"],
-# )
+from routes.connection import redis_client
+from fast_flights import FlightData, Passengers, Result, get_flights
 
 async def options_flight():
     return JSONResponse(
@@ -27,23 +14,28 @@ async def options_flight():
 async def flight(request: Request):
     try:
         data = await request.json()
-        response = data.get("user_input")
+        response = data.get("user_input") if isinstance(data.get("user_input"), dict) else data
         if response is None:
             raise HTTPException(status_code=400, detail="Missing 'user_input' in request.")
 
-        date = response.get("date")
-        from_airport = response.get("from_airport")
-        to_airport = response.get("to_airport")
+        date = str(response.get("date", "")).strip()
+        from_airport = str(response.get("from_airport", "")).strip().upper()
+        to_airport = str(response.get("to_airport", "")).strip().upper()
 
         if not all([date, from_airport, to_airport]):
             raise HTTPException(status_code=400, detail="Incomplete flight data.")
 
         cache_key = f"flights:{from_airport}:{to_airport}:{date}"
-        cached_data = redis_client.get(cache_key)
+        try:
+            cached_data = redis_client.get(cache_key)
+        except Exception:
+            cached_data = None
+
         if cached_data:
             return JSONResponse(content=json.loads(cached_data))
 
-        result = get_flights(
+        result = await run_in_threadpool(
+            get_flights,
             flight_data=[FlightData(date=date, from_airport=from_airport, to_airport=to_airport)],
             trip="one-way",
             seat="economy",
@@ -65,7 +57,10 @@ async def flight(request: Request):
             }
             for f in result.flights
         ]
-        redis_client.setex(cache_key, 3600, json.dumps(flights_data))
+        try:
+            redis_client.setex(cache_key, 3600, json.dumps(flights_data))
+        except Exception:
+            pass
         return JSONResponse(content=flights_data)
 
     except Exception as e:
