@@ -239,7 +239,39 @@ body {
   border-radius: 10px;
   margin-bottom: 30px;
   line-height: 1.8;
-  white-space: pre-line;
+}
+
+.summary-markdown-heading {
+  color: var(--primary-color);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+}
+
+.summary-markdown-heading:first-child {
+  margin-top: 0;
+}
+
+.summary-markdown-paragraph {
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.summary-markdown-list,
+.summary-markdown-ordered-list {
+  margin: 0 0 18px 22px;
+  color: var(--text-primary);
+}
+
+.summary-markdown-list li,
+.summary-markdown-ordered-list li {
+  margin-bottom: 8px;
+}
+
+.summary-divider {
+  border: 0;
+  border-top: 1px solid #e4e7ec;
+  margin: 22px 0;
 }
 
 .summary-section {

@@ -28,7 +28,103 @@ const TypingIndicator = () => {
   );
 };
 
-// Trip summary card components
+const renderInlineText = (text) => {
+  const parts = String(text || "").split(/(\*\*.*?\*\*)/g).filter(Boolean);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={index}>{part}</React.Fragment>;
+  });
+};
+
+const renderTripSummary = (summary) => {
+  const lines = String(summary || "").split(/\r?\n/);
+  const elements = [];
+  let bulletItems = [];
+  let numberedItems = [];
+  let keyIndex = 0;
+
+  const flushBullets = () => {
+    if (bulletItems.length > 0) {
+      elements.push(
+        <ul key={`ul-${keyIndex++}`} className="summary-markdown-list">
+          {bulletItems.map((item, index) => (
+            <li key={`bullet-${index}`}>{renderInlineText(item)}</li>
+          ))}
+        </ul>
+      );
+      bulletItems = [];
+    }
+  };
+
+  const flushNumbered = () => {
+    if (numberedItems.length > 0) {
+      elements.push(
+        <ol key={`ol-${keyIndex++}`} className="summary-markdown-ordered-list">
+          {numberedItems.map((item, index) => (
+            <li key={`numbered-${index}`}>{renderInlineText(item)}</li>
+          ))}
+        </ol>
+      );
+      numberedItems = [];
+    }
+  };
+
+  const flushLists = () => {
+    flushBullets();
+    flushNumbered();
+  };
+
+  lines.forEach((rawLine) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushLists();
+      return;
+    }
+
+    if (/^(\*\*\*|---)$/.test(line)) {
+      flushLists();
+      elements.push(<hr key={`hr-${keyIndex++}`} className="summary-divider" />);
+      return;
+    }
+
+    if (/^###\s+/.test(line)) {
+      flushLists();
+      elements.push(
+        <h3 key={`h3-${keyIndex++}`} className="summary-markdown-heading">
+          {renderInlineText(line.replace(/^###\s+/, ""))}
+        </h3>
+      );
+      return;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      flushBullets();
+      numberedItems.push(line.replace(/^\d+\.\s+/, ""));
+      return;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      flushNumbered();
+      bulletItems.push(line.replace(/^[-*]\s+/, ""));
+      return;
+    }
+
+    flushLists();
+    elements.push(
+      <p key={`p-${keyIndex++}`} className="summary-markdown-paragraph">
+        {renderInlineText(line)}
+      </p>
+    );
+  });
+
+  flushLists();
+  return elements;
+};
+
 const FlightCard = ({ flight }) => {
   return (
     <div className="summary-card flight-card">
@@ -253,7 +349,7 @@ function Chat() {
           </div>
           
           <div className="summary-text">
-            <p>{tripSummary}</p>
+            {renderTripSummary(tripSummary)}
           </div>
           
           <div className="summary-section">
